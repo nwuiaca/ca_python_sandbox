@@ -1,0 +1,280 @@
+COMMENT ****************************************************************************************************
+COMMENT *** Script to calculate student balance over years
+COMMENT ****************************************************************************************************
+
+COMMENT
+Author: Albert Janse van Rensburg (Pers 21162395)
+  Date: 14 May 2024
+END
+
+COMMENT
+Updates:
+END 
+
+COMMENT
+Notes:
+01.
+END
+
+COMMENT
+Process/Procedures:
+01.
+END
+
+COMMENT
+Prelimanary variables needed:
+01.v_dispscm (Script complete message)
+Prelimanary files needed:
+01._101_Merge_data (Script)
+02._101_Tran_all
+END
+
+COMMENT
+Results:
+01.
+END
+
+COMMENT ****************************************************************************************************
+COMMENT *** Set the environment
+COMMENT ****************************************************************************************************
+
+SET FOLDER TO /_202_Overyear_debit
+
+PAUSE "File xxx needed extra for this analysis!"
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging
+COMMENT ****************************************************************************************************
+
+OPEN _102ab_Stud_tran
+CROSSTAB ON STUDENT COLUMNS YEAR SUBTOTAL AMOUNT TO "_202aa_Cros_tran.FIL" OPEN
+
+OPEN _102ab_Stud_tran
+CROSSTAB ON STUDENT COLUMNS YEAR SUBTOTAL AMOUNT IF OCCURS("001z031z061",TRANCODE)=0 AND AMOUNT>0 TO "_202ab_Cros_dt_tran.FIL" OPEN
+
+OPEN _102ab_Stud_tran
+CROSSTAB ON STUDENT COLUMNS YEAR SUBTOTAL AMOUNT IF OCCURS("001z031z061",TRANCODE)=0 AND AMOUNT<0 TO "_202ac_Cros_ct_tran.FIL" OPEN
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2022
+COMMENT ****************************************************************************************************
+
+OPEN _202aa_Cros_tran
+EXTRACT FIELDS STUDENT AMOUNT_2023 TO "_202_2023" OPEN
+DEFINE FIELD _2023 COMPUTED AMOUNT_2023
+
+OPEN _202_2023
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 SKEY STUDENT WITH AMOUNT_2022 PRIMARY TO "_202_2022" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2022 COMPUTED
+
+AMOUNT_2022 IF AMOUNT_2022 > 0 AND AMOUNT_2022 <= _2023
+_2023 IF AMOUNT_2022 > 0 AND AMOUNT_2022 > _2023
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2021
+COMMENT ****************************************************************************************************
+
+OPEN _202_2022
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 SKEY STUDENT WITH AMOUNT_2021 PRIMARY TO "_202_2021" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2021 COMPUTED
+
+AMOUNT_2021 IF AMOUNT_2021 > 0 AND AMOUNT_2021 <= _2022
+_2022 IF AMOUNT_2021 > 0 AND AMOUNT_2021 > _2022
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2020
+COMMENT ****************************************************************************************************
+
+OPEN _202_2021
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 SKEY STUDENT WITH AMOUNT_2020 PRIMARY TO "_202_2020" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2020 COMPUTED
+
+AMOUNT_2020 IF AMOUNT_2020 > 0 AND AMOUNT_2020 <= _2021
+_2021 IF AMOUNT_2020 > 0 AND AMOUNT_2020 > _2021
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2019
+COMMENT ****************************************************************************************************
+
+OPEN _202_2020
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 SKEY STUDENT WITH AMOUNT_2019 PRIMARY TO "_202_2019" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2019 COMPUTED
+
+AMOUNT_2019 IF AMOUNT_2019 > 0 AND AMOUNT_2019 <= _2020
+_2020 IF AMOUNT_2019 > 0 AND AMOUNT_2019 > _2020
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2018
+COMMENT ****************************************************************************************************
+
+OPEN _202_2019
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 _2019 SKEY STUDENT WITH AMOUNT_2018 PRIMARY TO "_202_2018" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2018 COMPUTED
+
+AMOUNT_2018 IF AMOUNT_2018 > 0 AND AMOUNT_2018 <= _2019
+_2019 IF AMOUNT_2018 > 0 AND AMOUNT_2018 > _2019
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2017
+COMMENT ****************************************************************************************************
+
+OPEN _202_2018
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 _2019 _2018 SKEY STUDENT WITH AMOUNT_2017 PRIMARY TO "_202_2017" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2017 COMPUTED
+
+AMOUNT_2017 IF AMOUNT_2017 > 0 AND AMOUNT_2017 <= _2018
+_2018 IF AMOUNT_2017 > 0 AND AMOUNT_2017 > _2018
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2016
+COMMENT ****************************************************************************************************
+
+OPEN _202_2017
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 _2019 _2018 _2017 SKEY STUDENT WITH AMOUNT_2016 PRIMARY TO "_202_2016" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2016 COMPUTED
+
+AMOUNT_2016 IF AMOUNT_2016 > 0 AND AMOUNT_2016 <= _2017
+_2017 IF AMOUNT_2016 > 0 AND AMOUNT_2016 > _2017
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2015
+COMMENT ****************************************************************************************************
+
+OPEN _202_2016
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 _2019 _2018 _2017 _2016 SKEY STUDENT WITH AMOUNT_2015 PRIMARY TO "_202_2015" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2015 COMPUTED
+
+AMOUNT_2015 IF AMOUNT_2015 > 0 AND AMOUNT_2015 <= _2016
+_2016 IF AMOUNT_2015 > 0 AND AMOUNT_2015 > _2016
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2014
+COMMENT ****************************************************************************************************
+
+OPEN _202_2015
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 _2019 _2018 _2017 _2016 _2015 SKEY STUDENT WITH AMOUNT_2014 PRIMARY TO "_202_2014" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2014 COMPUTED
+
+AMOUNT_2014 IF AMOUNT_2014 > 0 AND AMOUNT_2014 <= _2015
+_2015 IF AMOUNT_2014 > 0 AND AMOUNT_2014 > _2015
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging 2013
+COMMENT ****************************************************************************************************
+
+OPEN _202_2014
+OPEN _202aa_Cros_tran SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2023 _2022 _2021 _2020 _2019 _2018 _2017 _2016 _2015 _2014 SKEY STUDENT WITH AMOUNT_2013 PRIMARY TO "_202_2013" OPEN PRESORT SECSORT
+CLOSE SECONDARY
+
+DEFINE FIELD _2013 COMPUTED
+
+AMOUNT_2013 IF AMOUNT_2013 > 0 AND AMOUNT_2013 <= _2014
+_2014 IF AMOUNT_2013 > 0 AND AMOUNT_2013 > _2014
+DEC(0,2)
+
+CLOSE PRIMARY
+
+COMMENT ****************************************************************************************************
+COMMENT *** Add students campus to analysis
+COMMENT ****************************************************************************************************
+
+COMMENT *** Import the campus data
+
+OPEN _202_2013
+OPEN _100_Impo_campus SECONDARY
+JOIN PKEY STUDENT FIELDS STUDENT _2013 _2014 _2015 _2016 _2017 _2018 _2019 _2020 _2021 _2022 _2023 SKEY STUDENT WITH CAMPUS PRIMARY TO "_202ba_Join_campus" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+DEFINE FIELD YEAR COMPUTED
+
+"2013" IF _2013 <> 0
+"2014" IF _2014 <> 0
+"2015" IF _2015 <> 0
+"2016" IF _2016 <> 0
+"2017" IF _2017 <> 0
+"2018" IF _2018 <> 0
+"2019" IF _2019 <> 0
+"2020" IF _2020 <> 0
+"2021" IF _2021 <> 0
+"2022" IF _2022 <> 0
+"2023"
+
+OPEN _202ba_Join_campus
+SUMMARIZE ON CAMPUS SUBTOTAL _2013 _2014 _2015 _2016 _2017 _2018 _2019 _2020 _2021 _2022 _2023 TO "_202ca_Summ_camp" OPEN PRESORT
+
+OPEN _202ba_Join_campus
+SUMMARIZE ON YEAR SUBTOTAL _2013 _2014 _2015 _2016 _2017 _2018 _2019 _2020 _2021 _2022 _2023 TO "_202da_Summ_year" OPEN PRESORT
+
+COMMENT ****************************************************************************************************
+COMMENT *** Calculate aging based on ACL AGE command
+COMMENT ****************************************************************************************************
+
+OPEN _102ab_Stud_tran
+AGE ON ACTDATE CUTOFF 20171231 INTERVAL 365,730,1095,1460,1825,2190,2555,2920,3285 SUBTOTAL AMOUNT IF OCCURS("001z031z061",TRANCODE)=0 OR TRANYEAR='2007' TO "Export\_202_Overyear_dt.txt"  
+
+PAUSE "See file EXPORT\_202_OVERYEAR_DT.TXT for age analysis!"
+
+COMMENT *** Display message to signify the end of script 
+
+IF v_dispscm = "1" PAUSE "Vss script completed!"
+
+COMMENT ****************************************************************************************************
+COMMENT *** Restore the environment
+COMMENT ****************************************************************************************************
+
+SET FOLDER TO /

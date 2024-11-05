@@ -1,0 +1,15 @@
+KFS (Updated 6 Jan 2020 by NWU:21162395)
+1.  Delete W:\KFS\Kfs.sqlite (To vacuum file for temporary unnecessary files)
+2.  Delete W:\KFS\Kfs_curr.sqlite (To vacuum file for temporary unnecessary files)
+3.  Delete W:\KFS\Kfs_prev.sqlite (To vacuum file for temporary unnecessary files)
+4.  Kfs.sqlite and Kfs_curr.sqlite would be re-created during the normal daily process oracle_to_sqlite)
+5.  Create Kfs_prev.sqlite by using the kfs_prev settings in the A001_oracle_to_sqlite_run_temp process.
+    Copy Kfs_prev.sqlite items from 000b_Table - master.csv to 000b_Table - temp.csv before running above process.
+6.  Run B006_kfs_period_list_run_Prev.py to create all necessary tables in Kfs_prev.sqlite.
+7.  All KFS processes should run normally now.
+
+VSS DEFERMENTS
+1. Calculate previous year deferments with C301_report_student_deferment_xprev.py
+2. Update external_data\C301_deferment_summ.csv with previous year data. From R:\Debtorstud\pyear\Deferment_001_summary.csv
+
+

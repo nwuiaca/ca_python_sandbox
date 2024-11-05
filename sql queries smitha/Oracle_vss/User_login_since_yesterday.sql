@@ -1,0 +1,20 @@
+﻿Select
+    su.KUSERCODE As USER_CODE,
+    su.FUSERBUSINESSENTITYID As NWU_NUMBER,
+    su.STARTDATE,
+    su.ENDDATE,
+    codses.CODELONGDESCRIPTION As LIMITER,
+    codtyp.CODELONGDESCRIPTION As USER_TYPE,
+    su.DATELASTLOGON As LAST_LOGIN,
+    To_Char(Cast(su.DATELASTLOGON As Date), 'hh24:mi') As LAST_LOGIN_TIME,
+    su.NOTE
+From
+    SYSTEMUSER su Left Join
+    CODEDESCRIPTION codses On codses.KCODEDESCID = su.FSESSIONTIMELIMITCODEID
+            And codses.KSYSTEMLANGUAGECODE = 3 Left Join
+    CODEDESCRIPTION codtyp On codtyp.KCODEDESCID = su.FUSERTYPECODEID
+            And codtyp.KSYSTEMLANGUAGECODE = 3
+Where
+    Trunc(su.DATELASTLOGON) >= Trunc(SysDate - 2)
+Order By
+    LAST_LOGIN Desc

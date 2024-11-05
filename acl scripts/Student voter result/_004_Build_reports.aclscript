@@ -1,0 +1,71 @@
+
+COMMENT Set the folder
+SET FOLDER /_004_Reports
+
+COMMENT Build text file with all responses
+OPEN _001ag_Responses_all_mah
+EXPORT FIELDS Response_ID Response_Status IP_Address Timestamp__dd_mm_yyyy_ Custom_Variable_1 Campus Present Device Operating_System Browser DELIMITED TO "Export_response.csv" KEEPTITLE SEPARATOR "," QUALIFIER '"'  
+OPEN _001ag_Responses_all_pot
+EXPORT FIELDS Response_ID Response_Status IP_Address Timestamp__dd_mm_yyyy_ Custom_Variable_1 Campus Present Device Operating_System Browser DELIMITED TO "Export_response.csv" SEPARATOR "," QUALIFIER '"' APPEND
+OPEN _001ag_Responses_all_vdp
+EXPORT FIELDS Response_ID Response_Status IP_Address Timestamp__dd_mm_yyyy_ Custom_Variable_1 Campus Present Device Operating_System Browser DELIMITED TO "Export_response.csv" SEPARATOR "," QUALIFIER '"' APPEND
+OPEN _001ag_Responses_all_odl
+EXPORT FIELDS Response_ID Response_Status IP_Address Timestamp__dd_mm_yyyy_ Custom_Variable_1 Campus Present Device Operating_System Browser DELIMITED TO "Export_response.csv" SEPARATOR "," QUALIFIER '"' APPEND
+IMPORT DELIMITED TO _004ba_Response_all_campus "_004ba_Response_all_campus.FIL" FROM "Export_response.csv" 0 SEPARATOR "," QUALIFIER '"' CONSECUTIVE STARTLINE 1 KEEPTITLE FIELD "Response_ID" N AT 1 DEC 0 WID 18 PIC "" AS "" FIELD "Response_Status" C AT 19 DEC 0 WID 18 PIC "" AS "" FIELD "IP_Address" C AT 37 DEC 0 WID 78 PIC "" AS "" FIELD "Timestamp__dd_mm_yyyy_" D AT 115 DEC 0 WID 38 PIC "YYYY-MM-DD HH:MM:SS" AS "Date_time" FIELD "Custom_Variable_1" C AT 153 DEC 0 WID 16 PIC "" AS "" FIELD "Campus" C AT 169 DEC 0 WID 28 PIC "" AS "" FIELD "Present" C AT 197 DEC 0 WID 16 PIC "" AS "" FIELD "Device" C AT 213 DEC 0 WID 16 PIC "" AS "" FIELD "Operating_System" C AT 229 DEC 0 WID 30 PIC "" AS "" FIELD "Browser" C AT 259 DEC 0 WID 36 PIC "" AS "" 
+DEFINE FIELD Student COMPUTED VALUE(SUBSTR( Custom_Variable_1, 1, 8),0)
+
+
+OPEN _004ba_Response_all_campus
+OPEN _001af_Allvoters SECONDARY
+JOIN PKEY Student FIELDS Response_ID Response_Status IP_Address Timestamp__dd_mm_yyyy_ Custom_Variable_1 Campus Present Student SKEY STUDENT WITH NAME CAMPUS PRESENT_CAT VOTE_REASON PRIMARY TO "_004bb_Response_voter_match" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+OPEN "_004bb_Response_voter_match"
+SORT ON Student Timestamp__dd_mm_yyyy_ Campus IF Student > 0 AND Response_Status = "Completed" AND Campus <> CAMPUS2 TO "_004bc_Response_voter_match_sort" OPEN ISOLOCALE root
+
+OPEN _004bc_Response_voter_match_sort
+SUMMARIZE ON Student TO "_004bd_Response_summ_student.FIL" OPEN PRESORT ISOLOCALE root
+
+OPEN _004bd_Response_summ_student
+OPEN _001af_Allvoters SECONDARY
+JOIN PKEY Student FIELDS Student SKEY STUDENT WITH NAME CAMPUS VOTE_REASON PRESENT_CAT PRIMARY TO "_004be_Response_add_student_detail.FIL" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+OPEN "_004be_Response_add_student_detail"
+OPEN _004ba_Response_all_campus SECONDARY
+JOIN PKEY Student FIELDS Student NAME CAMPUS VOTE_REASON PRESENT_CAT SKEY Student WITH Response_ID Response_Status Timestamp__dd_mm_yyyy_ IP_Address Campus Present TO "_004bf_Response_add_response_detail.FIL" OPEN PRESORT MANY SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+OPEN "_004bf_Response_add_response_detail"
+SORT ON Student Timestamp__dd_mm_yyyy_ TO "_004bg_Response_sort" OPEN ISOLOCALE root
+
+OPEN _004bg_Response_sort
+EXTRACT FIELDS Student NAME As 'Name' CAMPUS As 'Study_campus' VOTE_REASON As 'Vote_status' PRESENT_CAT As 'Study_category' Response_ID Response_Status Timestamp__dd_mm_yyyy_ as 'Date_time_voted' IP_Address Campus2 As 'Voted_for_campus' Present As 'Calc_category' TO "_004bh_Response_spoilballot_report" OPEN
+
+COMMENT Summarize the no campus voters into on voters roll and not 
+OPEN _004ad_Response_spoiled_nocampus
+OPEN _001af_Allvoters SECONDARY
+JOIN PKEY StudentNo FIELDS Browser CAMPUS COUNT Country_Code Custom_Variable_1 Device Duplicate IP_Address NAME Operating_System Region Region2 Response_ID Response_Status Seq_Number StudentNo Time_Taken Timestamp VOTE_REASON SKEY STUDENT WITH ACTIVE CAMPUS ENROL_CAT FACULTY MAINQUAL NAME PRESENT_CAT QUAL_TYPE STUDENT VOTE_REASON PRIMARY TO "_004ca_Nocampus_all" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+COMMENT Identify no campus on voters roll
+OPEN _004ca_Nocampus_all
+EXTRACT RECORD IF VOTE_REASON2 = 'ON VOTERS ROLL' TO "_004cb_Nocampus_onvotersroll_spoiled" OPEN
+
+COMMENT Identify no campus on voters roll
+OPEN _004ca_Nocampus_all
+EXTRACT RECORD IF VOTE_REASON2 <> 'ON VOTERS ROLL' TO "_004cd_Nocampus_novotersroll_illegal" OPEN
+
+COMMENT Build report of spoiled votes - votes on other campus than own
+OPEN _004cb_Nocampus_onvotersroll_spoiled
+EXTRACT FIELDS STUDENT NAME2 CAMPUS2 VOTE_REASON2 PRESENT_CAT Response_ID Response_Status Timestamp IP_Address Device Operating_System Browser Region Country_Code TO "_004ce_Nocampus_spoiled_report" OPEN
+
+COMMENT Build report of spoiled votes - votes on other campus than own
+OPEN _004cd_Nocampus_novotersroll_illegal
+EXTRACT FIELDS Response_ID StudentNo As 'CASUser' Response_Status Timestamp IP_Address Device Operating_System Browser Region Country_Code TO "_004cf_Nocampus_illegal_report" OPEN
+
+COMMENT Device analysis
+OPEN _004ba_Response_all_campus
+SUMMARIZE ON Device Operating_System Browser TO "004da_Device_analysis.FIL" OPEN PRESORT ISOLOCALE root
+OPEN "_04da_Device_analysis"
+ 

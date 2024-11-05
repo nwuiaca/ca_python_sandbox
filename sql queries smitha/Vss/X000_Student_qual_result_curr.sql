@@ -1,0 +1,45 @@
+﻿SELECT
+  X000_Student_qual_result.KBUSINESSENTITYID,
+  X000_Student_qual_result.KACADEMICPROGRAMID,
+  X000_Student_qual_result.KQUALFOSRESULTCODEID,
+  X000_Student_qual_result.RESULT,
+  X000_Student_qual_result.KRESULTYYYYMM,
+  X000_Student_qual_result.KSTUDQUALFOSRESULTID,
+  X000_Student_qual_result.FGRADUATIONCEREMONYID,
+  X000_Student_qual_result.FPOSTPONEMENTCODEID,
+  X000_Student_qual_result.POSTPONE_REAS,
+  X000_Student_qual_result.RESULTISSUEDATE,
+  X000_Student_qual_result.DISCONTINUEDATE,
+  X000_Student_qual_result.FDISCONTINUECODEID,
+  X000_Student_qual_result.DISCONTINUE_REAS,
+  X000_Student_qual_result.RESULTPASSDATE,
+  X000_Student_qual_result.FLANGUAGECODEID,
+  X000_Student_qual_result.ISSUESURNAME,
+  X000_Student_qual_result.CERTIFICATESEQNUMBER,
+  X000_Student_qual_result.AVGMARKACHIEVED,
+  X000_Student_qual_result.PROCESSSEQNUMBER,
+  X000_Student_qual_result.FRECEIPTID,
+  X000_Student_qual_result.FRECEIPTLINEID,
+  X000_Student_qual_result.ISINABSENTIA,
+  X000_Student_qual_result.FPROGRAMAPID,
+  X000_Student_qual_result.FISSUETYPECODEID,
+  X000_Student_qual_result.ISSUE_TYPE,
+  X000_Student_qual_result.DATEPRINTED,
+  X000_Student_qual_result.LOCKSTAMP,
+  X000_Student_qual_result.AUDITDATETIME,
+  X000_Student_qual_result.FAUDITSYSTEMFUNCTIONID,
+  X000_Student_qual_result.FAUDITUSERCODE,
+  X000_Student_qual_result.FAPPROVEDBYCODEID,
+  X000_Student_qual_result.FAPPROVEDBYUSERCODE,
+  X000_Student_qual_result.DATERESULTAPPROVED,
+  X000_Student_qual_result.FENROLMENTPRESENTATIONID,
+  X000_Student_qual_result.CERTDISPATCHDATE,
+  X000_Student_qual_result.CERTDISPATCHREFNO,
+  X000_Student_qual_result.ISSUEFIRSTNAMES
+FROM
+  X000_Student_qual_result
+WHERE
+  X000_Student_qual_result.KRESULTYYYYMM >= SubStr('20180101', 1, 6) AND
+  X000_Student_qual_result.KRESULTYYYYMM <= SubStr('20181231', 1, 6)
+ORDER BY
+  X000_Student_qual_result.RESULT

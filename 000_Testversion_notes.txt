@@ -1,0 +1,64 @@
+TEST VERSION METHOD NOTES (Implemented 12 Feb 2020)
+---------------------------------------------------
+
+V1.0.8 (Implemented Jan 2020)
+01. Implemented set previous step to make sure that the LAST previous finding is used in the lookup of previous tests.
+
+V1.0.9 (Implemented Jan 2020)
+01. Implemented generic function functest to get and set previous, and get officer and supervisor.
+
+V1.1.1 (10 Feb 2020)
+01. Add send message facilities. In script add:
+    from _my_modules import funcsms to import own modules
+    l_mess variable to True or False to send or not
+    s_desc variable to host a human like description send as a message.
+    funcsms.send_telegram() to send the messages
+
+V1.1.2 (13 Mar 2020)
+01. Add audit officer and supervisor to test.
+    Use "AUD" in _external_data\001_own_hr_lookups.csv and _external_data\001_own_vss_lookups.csv.
+    Use reference in left join AUD_OFF and AUD_SUP
+
+V2.0.0 (12 Feb 2020)
+01. Add s_fprefix variable. Easier to maintain an script new tests.
+02. Add s_finding variable. Use the same finding description everywhere.
+03. File naming convention:
+    a_? = Full name and all bulk findings.
+    b_finding = Findings selected to go forward.
+    c_getprev = Replaced by generic function functest.get_previous_finding producing Z001aa_getprev
+    c_setprev = Replaced by generic function functest.set_previous_finding producing Z001ab_setprev
+    d_addprev = Merge b_finding with previous findings.
+    e_newprev = Build new table to export as previous findings.
+    f_officer = Replaced by generic function functest.get_officer and produce Z001af_officer.
+    g_supervisor = Replaced by generic function functest.get_supervisor and produce Z001ag_supervisor.
+    h_detail = Merge findings, officers, supervisors and any other related data.
+    x_? = Build final export finding file with audit finding and nice readable column names.
+04. Re-affirm use of i_finding_before and i_finding_after variables.
+
+V2.0.1 (27 Feb 2020)
+01. Add s_fname: str = "reg_fee_zero" variable.
+
+V2.0.2 (10 Feb 2020)
+01. Add send message facilities. In script add:
+    from _my_modules import funcsms to import own modules
+    l_mess variable to True or False to send or not
+    s_desc variable to host a human like description send as a message.
+    funcsms.send_telegram() to send the messages
+
+V2.0.3 (13 Mar 2020)
+01. Add audit officer and supervisor to test.
+    Use "AUD" in _external_data\001_own_hr_lookups.csv and _external_data\001_own_vss_lookups.csv.
+    Use reference in left join AUD_OFF and AUD_SUP
+
+V2.0.4 (21 May 2021)
+01. System (oracle) person email becomes mail1 and calculated email (nwu number + @nwu.ac.za) becomes mail2 for
+    all remediation and organization officers.
+
+V2.0.5 (16 Jul 2021)
+01. Add test flag system. Use FUNCTEST.GET_TEST_FLAG to read the variable.
+
+V2.0.6 (21 Nov 2023)
+01. Start using formatted strings and full variable names that provide for better reading.
+
+
+

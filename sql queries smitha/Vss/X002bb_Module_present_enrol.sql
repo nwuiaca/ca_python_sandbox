@@ -1,0 +1,24 @@
+﻿SELECT
+  X000_Present_enrol_category.KENROLMENTPRESENTATIONID,
+  X000_Present_enrol_category.ENROL_CAT_E,
+  X000_Present_enrol_category.ENROL_CAT_A,
+  X000_Present_enrol_category.PRESENT_CAT_E,
+  X000_Present_enrol_category.PRESENT_CAT_A,
+  X000_Present_enrol_category.STARTDATE,
+  X000_Present_enrol_category.ENDDATE,
+  X002ba_Module_present_org.FSITEORGUNITNUMBER,
+  X002ba_Module_present_org.ORGUNIT_TYPE,
+  X002ba_Module_present_org.ORGUNIT_NAME,
+  X002ba_Module_present_org.FMODULEAPID,
+  X002ba_Module_present_org.COURSECODE,
+  X002ba_Module_present_org.COURSELEVEL,
+  X002ba_Module_present_org.COURSEMODULE,
+  X002ba_Module_present_org.FCOURSEGROUPCODEID,
+  X002ba_Module_present_org.NAME_GROUP,
+  X002ba_Module_present_org.NAAM_GROEP,
+  X002ba_Module_present_org.ISEXAMMODULE,
+  X000_Present_enrol_category.EXAMSUBMINIMUM
+FROM
+  X000_Present_enrol_category
+  INNER JOIN X002ba_Module_present_org ON X002ba_Module_present_org.KPRESENTINGOUID =
+    X000_Present_enrol_category.FMODULEPRESENTINGOUID

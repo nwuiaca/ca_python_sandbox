@@ -1,0 +1,635 @@
+COMMENT
+//ANALYTIC Robot_ia_upload
+  Robot to upload basic ia assignments daily from various ODBC connectors
+//RESULT LOG
+END
+
+COMMENT
+INDEX
+ODBC64
+    Web_ia_nwu->Xneelo internal audit wip mysql database
+ENVIRONMENT
+INTERNAL AUDIT MASTER FILES
+    CUSTOMER SATISFACTION SURVEY
+    ASSIGNMENT CURRENT YEAR
+    ASSIGNMENT PREVIOUS YEAR
+    ASSIGNMENT SI CURRENT PERIOD
+    ASSIGNMENT SI CURRENT YEAR
+    ASSIGNMENT SI PREVIOUS PERIOD
+    ASSIGNMENT SI PREVIOUS YEAR
+    TEST ASSIGNMENT FOLLOWUP NOFINDING
+    TEST ASSIGNMENT FOLLOWUP NOFINDING
+    TEST ASSIGNMENT OVERDUE
+    TEST ASSIGNMENT PRIORITY INCONSISTENT
+    TEST ASSIGNMENT STATUS INCONSISTENT
+    TEST ASSIGNMENT YEAR INCONSISTENT
+    TEST FINDING RATING INVALID
+    FINDING PREVIOUS YEAR
+    FINDING CURRENT YEAR
+
+COMMENT ENVIRONMENT
+COMMENT ****************************************************************************************************
+
+DO _Password
+SET SAFETY OFF
+
+COMMENT INTERNAL AUDIT MASTER FILES
+COMMENT ****************************************************************************************************
+
+COMMENT CUSTOMER SATISFACTION SURVEY
+
+ASSIGN v_file_name = "CUSTOMER_SATISFACTION_SURVEY"
+ASSIGN v_source_file = "X002b_Customer_satisfaction_distribute"
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "%v_file_name%.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM %v_source_file% ) END_QUERY
+OPEN %v_file_name%
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "242180@eu"
+CLOSE PRIMARY
+
+COMMENT ASSIGNMENT CURRENT YEAR
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "ASSIGNMENT_CURRENT.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X000_ASSIGNMENT_CURR ) END_QUERY
+OPEN ASSIGNMENT_CURRENT
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182077@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT ASSIGNMENT PREVIOUS YEAR
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "ASSIGNMENT_PREVIOUS.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X000_ASSIGNMENT_PREV ) END_QUERY
+OPEN ASSIGNMENT_PREVIOUS
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182079@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT ASSIGNMENT SI CURRENT PERIOD
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "ASSIGNMENT_SI_CURRENT.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X000_ASSIGNMENT_SI_CURR ) END_QUERY
+OPEN ASSIGNMENT_SI_CURRENT
+DEFINE FIELD Date_start COMPUTED CTOD(start_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report COMPUTED CTOD(report_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report1 COMPUTED CTOD(report1_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report2 COMPUTED CTOD(report2_date,'YYYY-MM-DD')
+DEFINE FIELD Date_due COMPUTED CTOD(due_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed COMPUTED CTOD(close_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed_calc COMPUTED CTOD(close_date_calc,'YYYY-MM-DD')
+DEFINE FIELD calc_status COMPUTED
+
+100 IF assignment_status = 'Completed'
+100 IF assignment_status = 'Registrar'
+VALUE(SUBSTR( assignment_status, 1, 2),0)
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "204163@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT ASSIGNMENT SI CURRENT YEAR
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "ASSIGNMENT_SI_CURRENT_YEAR.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X000_ASSIGNMENT_SI_CURR_YEAR ) END_QUERY
+OPEN ASSIGNMENT_SI_CURRENT_YEAR
+DEFINE FIELD Date_start COMPUTED CTOD(start_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report COMPUTED CTOD(report_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report1 COMPUTED CTOD(report1_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report2 COMPUTED CTOD(report2_date,'YYYY-MM-DD')
+DEFINE FIELD Date_due COMPUTED CTOD(due_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed COMPUTED CTOD(close_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed_calc COMPUTED CTOD(close_date_calc,'YYYY-MM-DD')
+DEFINE FIELD calc_status COMPUTED
+
+100 IF assignment_status = 'Completed'
+100 IF assignment_status = 'Registrar'
+VALUE(SUBSTR( assignment_status, 1, 2),0)
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "204182@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT ASSIGNMENT SI PREVIOUS PERIOD
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "ASSIGNMENT_SI_PREVIOUS.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X000_ASSIGNMENT_SI_PREV ) END_QUERY
+OPEN ASSIGNMENT_SI_PREVIOUS
+DEFINE FIELD Date_start COMPUTED CTOD(start_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report COMPUTED CTOD(report_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report1 COMPUTED CTOD(report1_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report2 COMPUTED CTOD(report2_date,'YYYY-MM-DD')
+DEFINE FIELD Date_due COMPUTED CTOD(due_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed COMPUTED CTOD(close_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed_calc COMPUTED CTOD(close_date_calc,'YYYY-MM-DD')
+DEFINE FIELD calc_status COMPUTED
+
+100 IF assignment_status = 'Completed'
+100 IF assignment_status = 'Registrar'
+VALUE(SUBSTR( assignment_status, 1, 2),0)
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "204181@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT ASSIGNMENT SI PREVIOUS YEAR
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "ASSIGNMENT_SI_PREVIOUS_YEAR.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X000_ASSIGNMENT_SI_PREV_YEAR ) END_QUERY
+OPEN ASSIGNMENT_SI_PREVIOUS_YEAR
+DEFINE FIELD Date_start COMPUTED CTOD(start_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report COMPUTED CTOD(report_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report1 COMPUTED CTOD(report1_date,'YYYY-MM-DD')
+DEFINE FIELD Date_report2 COMPUTED CTOD(report2_date,'YYYY-MM-DD')
+DEFINE FIELD Date_due COMPUTED CTOD(due_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed COMPUTED CTOD(close_date,'YYYY-MM-DD')
+DEFINE FIELD Date_closed_calc COMPUTED CTOD(close_date_calc,'YYYY-MM-DD')
+DEFINE FIELD calc_status COMPUTED
+
+100 IF assignment_status = 'Completed'
+100 IF assignment_status = 'Registrar'
+VALUE(SUBSTR( assignment_status, 1, 2),0)
+COUNT
+IF COUNT1 > 0 EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "204183@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST ASSIGNMENT OVERDUE
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_ASSIGNMENT_OVERDUE.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_TEST_ASSIGNMENT_OVERDUE_CURR ) END_QUERY
+OPEN TEST_ASSIGNMENT_OVERDUE
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182595@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST ASSIGNMENT PRIORITY INCONSISTENT
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_PRIORITY_INCONSISTENT.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_TEST_PRIORITY_INCONSISTENT_CURR ) END_QUERY
+OPEN TEST_PRIORITY_INCONSISTENT
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182545@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST ASSIGNMENT STATUS INCONSISTENT
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_STATUS_INCONSISTENT.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_TEST_STATUS_INCONSISTENT_CURR ) END_QUERY
+OPEN TEST_STATUS_INCONSISTENT
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182537@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST ASSIGNMENT YEAR INCONSISTENT
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_YEAR_INCONSISTENT.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_TEST_YEAR_INCONSISTENT_CURR ) END_QUERY
+OPEN TEST_YEAR_INCONSISTENT
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182538@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST ASSIGNMENT FOLLOWUP NOFINDING
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_FOLLOWUP_NOFINDING.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_TEST_FOLLOWUP_NOFINDING_CURR ) END_QUERY
+OPEN TEST_FOLLOWUP_NOFINDING
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182723@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST ASSIGNMENT FOLLOWUP NOFINDING
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_FOLLOWUP_NOREMINDER.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_TEST_FOLLOWUP_NOREMINDER_CURR ) END_QUERY
+OPEN TEST_FOLLOWUP_NOREMINDER
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "182801@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT TEST FINDING RATING INVALID
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_ia_nwu_local" TO "TEST_FINDING_RATING_INVALID.FIL" CHARMAX 250 MEMOMAX 250 
+ SOURCE( )
+ SQL_QUERY( SELECT * FROM X001_Test_finding_rating_invalid_curr ) END_QUERY
+OPEN TEST_FINDING_RATING_INVALID
+COUNT
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "203732@eu" OVERWRITE
+CLOSE PRIMARY
+
+COMMENT FINDING PREVIOUS YEAR
+COMMENT ****************************************************************************************************
+
+COMMENT Obtain the data
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_nwu_ia" TO "FINDING_PERIOD.FIL" CHARMAX 250 MEMOMAX 250  ALLCHARACTER
+ SOURCE()
+ SQL_QUERY( 
+    SELECT
+        `ia_finding`.`ia_find_auto` AS `ia_find_auto`,
+        `ia_finding`.`ia_find_name` AS `ia_find_name`,
+        `ia_finding`.`ia_find_private` AS `ia_find_private`,
+        `ia_finding`.`ia_find_appendix` AS `ia_find_appendix`,
+        `ia_assignment`.`ia_assi_auto` AS `ia_assignment_ia_assi_auto`,
+        `ia_assignment`.`ia_assi_year` AS `ia_assi_year`,
+        `ia_assignment`.`ia_assi_priority` AS `ia_assi_priority`,
+        `ia_assignment`.`ia_assi_name` AS `ia_assi_name`,
+        `ia_assignment`.`ia_assi_proofdate` AS `ia_assi_proofdate`,
+        `ia_assignment`.`ia_assi_finishdate` AS `ia_assi_finishdate`,
+        `ia_assignment_status`.`ia_assistat_name` AS `ia_assistat_name`,
+        `ia_assignment_category`.`ia_assicate_name` AS `ia_assicate_name`,
+        `ia_assignment_category`.`ia_assicate_private` AS `ia_assicate_private`,
+        `ia_assignment_type`.`ia_assitype_name` AS `ia_assitype_name`,
+        `ia_assignment_type`.`ia_assitype_private` AS `ia_assitype_private`,
+        `jm4_users`.`name` AS `ia_user_name`,
+        `jm4_users`.`email` AS `ia_user_mail`,
+        `jm4_users`.`block` AS `ia_user_active`,
+        `ia_finding_status`.`ia_findstat_name` AS `ia_findstat_name`,
+        `ia_finding_status`.`ia_findstat_private` AS `ia_findstat_private`,
+        `ia_finding_control`.`ia_findcont_auto` AS `ia_finding_control_ia_findcont_auto`,
+        `ia_finding_control`.`ia_findcont_name` AS `ia_findcont_name`,
+        `ia_finding_control`.`ia_findcont_value` AS `ia_findcont_value`,
+        `ia_finding_rate`.`ia_findrate_impact` AS `ia_findrate_impact`,
+        `ia_finding_rate`.`ia_findrate_name` AS `ia_findrate_name`,
+        `ia_finding_likelihood`.`ia_findlike_value` AS `ia_findlike_value`,
+        `ia_finding_likelihood`.`ia_findlike_name` AS `ia_findlike_name` 
+    FROM
+        ((((((((`ia_finding` `ia_finding` 
+    INNER JOIN
+        `ia_assignment` `ia_assignment` 
+            ON `ia_finding`.`ia_assi_auto` = `ia_assignment`.`ia_assi_auto`
+        ) 
+LEFT JOIN
+    `ia_assignment_status` `ia_assignment_status` 
+        ON `ia_assignment`.`ia_assistat_auto` = `ia_assignment_status`.`ia_assistat_auto`
+) 
+LEFT JOIN
+    `ia_assignment_category` `ia_assignment_category` 
+        ON `ia_assignment`.`ia_assicate_auto` = `ia_assignment_category`.`ia_assicate_auto`
+) 
+LEFT JOIN
+    `ia_assignment_type` `ia_assignment_type` 
+        ON `ia_assignment`.`ia_assitype_auto` = `ia_assignment_type`.`ia_assitype_auto`
+) 
+LEFT JOIN
+`jm4_users` `jm4_users` 
+    ON `ia_assignment`.`ia_user_sysid` = `jm4_users`.`id`
+) 
+LEFT JOIN
+`ia_finding_status` `ia_finding_status` 
+ON `ia_finding`.`ia_findstat_auto` = `ia_finding_status`.`ia_findstat_auto`
+) 
+LEFT JOIN
+`ia_finding_control` `ia_finding_control` 
+ON `ia_finding`.`ia_findcont_auto` = `ia_finding_control`.`ia_findcont_auto`
+) 
+LEFT JOIN
+`ia_finding_rate` `ia_finding_rate` 
+ON `ia_finding`.`ia_findrate_auto` = `ia_finding_rate`.`ia_findrate_auto`
+) 
+LEFT JOIN
+`ia_finding_likelihood` `ia_finding_likelihood` 
+ON `ia_finding`.`ia_findlike_auto` = `ia_finding_likelihood`.`ia_findlike_auto` 
+WHERE
+(
+`ia_assignment`.`ia_assi_year` = 2024
+AND `jm4_users`.`block` = 0
+AND `ia_assignment_category`.`ia_assicate_private` = '0'
+AND `ia_assignment_type`.`ia_assitype_private` = '0'
+AND `ia_finding_status`.`ia_findstat_private` = '0'
+AND `ia_finding`.`ia_find_private` = '0'
+AND `ia_finding`.`ia_find_appendix` = '0'
+) 
+OR (
+`ia_assignment`.`ia_assi_year` < 2024 
+AND `ia_assignment`.`ia_assi_priority` < N'9'
+AND `jm4_users`.`block` = 0
+AND `ia_assignment_category`.`ia_assicate_private` = '0'
+AND `ia_assignment_type`.`ia_assitype_private` = '0'
+AND `ia_finding_status`.`ia_findstat_private` = '0'
+AND `ia_finding`.`ia_find_private` = '0'
+AND `ia_finding`.`ia_find_appendix` = '0'
+) 
+OR (
+`ia_assignment`.`ia_assi_finishdate` >= DATE '2023-10-01' 
+AND `ia_assignment`.`ia_assi_finishdate` <= DATE '2024-09-30'
+AND `jm4_users`.`block` = 0
+AND `ia_assignment_category`.`ia_assicate_private` = '0'
+AND `ia_assignment_type`.`ia_assitype_private` = '0'
+AND `ia_finding_status`.`ia_findstat_private` = '0'
+AND `ia_finding`.`ia_find_private` = '0'
+AND `ia_finding`.`ia_find_appendix` = '0'
+)
+ ) END_QUERY
+
+COMMENT Add priority descriptions
+
+OPEN FINDING_PERIOD
+DEFINE FIELD ia_assi_priority_text COMPUTED
+
+'Closed' IF ia_assi_priority = '9'
+'Continuous' IF ia_assi_priority = '8'
+'Follow-up' IF ia_assi_priority = '4'
+'High' IF ia_assi_priority = '3'
+'Medium' IF ia_assi_priority = '2'
+'Low' IF ia_assi_priority = '1'
+'Inactive'
+
+DEFINE FIELD ia_assi_finishdate_calc COMPUTED
+
+ia_assi_proofdate IF ia_assi_priority = '4'
+DATE(TODAY()) IF ia_assi_priority = '8'
+ia_assi_finishdate
+
+COMMENT Calculate the assignment closing date month for reporting purposes
+
+DEFINE FIELD assi_month COMPUTED '0000-00'
+
+COMMENT Calculate a simplified assignment status
+
+DEFINE FIELD assi_status_calc COMPUTED
+
+'1-NotStarted' IF SUBSTRING(ia_assistat_name,1,2) = '00'
+'2-Planning' IF SUBSTRING(ia_assistat_name,1,2) = '10'
+'3-Fieldwork<50%' IF VALUE(SUBSTRING(ia_assistat_name,1,2),0) >= 11 AND VALUE(SUBSTRING(ia_assistat_name,1,2),0) <= 50
+'4-Fieldwork>50%' IF VALUE(SUBSTRING(ia_assistat_name,1,2),0) >= 51 AND VALUE(SUBSTRING(ia_assistat_name,1,2),0) <= 79
+'5-DraftReport' IF VALUE(SUBSTRING(ia_assistat_name,1,2),0) >= 80 AND VALUE(SUBSTRING(ia_assistat_name,1,2),0) <= 99
+'6-Completed'
+
+COMMENT Calculate a simplified control effectiveness value 
+
+DEFINE FIELD assi_findcont_name_calc COMPUTED
+
+'0.10 Ineffective' IF ia_findcont_name = 'Ineffective'
+'0.10 Ineffective' IF ia_findcont_name = 'Inadequate control'
+'0.10 Ineffective' IF ia_findcont_name = 'Ineffective control'
+'0.10 Ineffective' IF ia_findcont_name = 'Non-compliance'
+'0.20 Requires improvement' IF ia_findcont_name = 'Requires improvement'
+'0.20 Requires improvement' IF ia_findcont_name = 'Room for improvement'
+'0.50 Satisfactory' IF ia_findcont_name = 'Satisfactory'
+'0.75 Good' IF ia_findcont_name = 'Good'
+'0.75 Good' IF ia_findcont_name = 'Effective control'
+'0.90 Highly effective' IF ia_findcont_name = 'Highly effective'
+'0.00 No value' IF ALLTRIM(ia_findcont_name) = 'No value'
+'0.00 No value' IF ALLTRIM(ia_findcont_name) = ''
+'0.00 No value' IF ia_findcont_name = 'Not applicable'
+ia_findcont_name
+
+DEFINE FIELD assi_findrate_name_calc COMPUTED
+
+'0 No rating' IF ia_findrate_name = ''
+'1 Minimal' IF ia_findrate_name = 'Recommendation'
+'1 Minimal' IF ia_findrate_name = 'Positive'
+'1 Minimal' IF ia_findrate_name = 'Positive control'
+'2 Minor' IF ia_findrate_name = 'Minor'
+'2 Minor' IF ia_findrate_name = 'Adjusted'
+'2 Minor' IF ia_findrate_name = 'Housekeeping control'
+'3 Significant' IF ia_findrate_name = 'Housekeeping'
+'3 Significant' IF ia_findrate_name = 'Less significant control'
+'4 Critical' IF ia_findrate_name = 'Significant'
+'4 Critical' IF ia_findrate_name = 'Important'
+'4 Critical' IF ia_findrate_name = 'Significant control'
+'5 Severe' IF ia_findrate_name = 'Critical'
+'5 Severe' IF ia_findrate_name = 'Critical weakness'
+'5 Severe' IF ia_findrate_name = 'Critical control'
+ia_findrate_name
+
+COMMENT Add number FIELDS
+
+DEFINE FIELD ia_findcont_number COMPUTED value(ia_findcont_value,2)
+DEFINE FIELD ia_findrate_number COMPUTED value(ia_findrate_impact,0)
+DEFINE FIELD ia_findlike_number COMPUTED value(ia_findlike_value,0)
+DEFINE FIELD ia_find_inherent_risk COMPUTED ia_findrate_number * ia_findlike_number
+DEFINE FIELD ia_find_residual_risk COMPUTED DEC(ia_find_inherent_risk * ia_findcont_number,2)
+
+COMMENT Add counter
+
+DEFINE FIELD counter COMPUTED 1
+
+COMMENT Sort the list
+
+OPEN FINDING_PERIOD
+SORT ON ia_user_name ia_assicate_name ia_assitype_name ia_assi_name IF ia_user_active = '1' ia_assicate_private = '0' TO "FINDING_PERIOD_SORT.FIL" OPEN ISOLOCALE root
+
+OPEN FINDING_PERIOD_SORT
+EXTRACT FIELDS ia_user_name AS 'Auditor' ia_user_active AS 'Auditor_active' ia_assignment_ia_assi_auto AS 'Assignment_file' ia_assi_year AS 'Year' ia_assicate_name AS 'Category' ia_assicate_private AS 'Category_private' ia_assitype_name AS 'Type' ia_assitype_private AS 'Type_private' ia_assi_name AS 'Assignment' ia_assi_priority AS 'Priority_value' ia_assi_priority_text AS 'Priority' ia_assistat_name AS 'Assignment_status' assi_status_calc AS 'Assignment_status_calc' ia_assi_proofdate AS 'Report_date' ia_assi_finishdate AS 'Closed_date' ia_assi_finishdate_calc AS 'Closed_date_calc' assi_month AS 'Closed_month' ia_find_auto AS 'Finding_file' ia_find_name AS 'Finding' ia_find_private AS 'Finding_private' ia_findstat_name AS 'Finding_status' ia_findstat_private AS 'Finding_status_private' ia_findcont_name AS 'Control' assi_findcont_name_calc AS 'Control_effectiveness' ia_findcont_number AS 'Control_effectiveness_number' assi_findrate_name_calc AS 'Impact_rating' ia_findrate_number AS 'Impact_rating_number' ia_findlike_name As 'Likelihood' ia_findlike_number AS 'Likelihood_number' ia_find_inherent_risk AS 'Inherent_risk' ia_find_residual_risk AS 'Residual_risk' ia_user_mail AS 'Auditor_email' counter AS 'Counter' TO "FINDING_PREV.FIL" OPEN
+
+OPEN FINDING_PREV
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "180912@eu" OVERWRITE
+
+COMMENT FINDING CURRENT YEAR
+COMMENT ****************************************************************************************************
+
+COMMENT Obtain the data
+
+ACCESSDATA64 ODBC "Dsn" NAME "Web_nwu_ia" TO "FINDING_PERIOD.FIL" CHARMAX 250 MEMOMAX 250  ALLCHARACTER
+ SOURCE()
+ SQL_QUERY( 
+    SELECT
+        `ia_finding`.`ia_find_auto` AS `ia_find_auto`,
+        `ia_finding`.`ia_find_name` AS `ia_find_name`,
+        `ia_finding`.`ia_find_private` AS `ia_find_private`,
+        `ia_finding`.`ia_find_appendix` AS `ia_find_appendix`,
+        `ia_assignment`.`ia_assi_auto` AS `ia_assignment_ia_assi_auto`,
+        `ia_assignment`.`ia_assi_year` AS `ia_assi_year`,
+        `ia_assignment`.`ia_assi_priority` AS `ia_assi_priority`,
+        `ia_assignment`.`ia_assi_name` AS `ia_assi_name`,
+        `ia_assignment`.`ia_assi_proofdate` AS `ia_assi_proofdate`,
+        `ia_assignment`.`ia_assi_finishdate` AS `ia_assi_finishdate`,
+        `ia_assignment_status`.`ia_assistat_name` AS `ia_assistat_name`,
+        `ia_assignment_category`.`ia_assicate_name` AS `ia_assicate_name`,
+        `ia_assignment_category`.`ia_assicate_private` AS `ia_assicate_private`,
+        `ia_assignment_type`.`ia_assitype_name` AS `ia_assitype_name`,
+        `ia_assignment_type`.`ia_assitype_private` AS `ia_assitype_private`,
+        `jm4_users`.`name` AS `ia_user_name`,
+        `jm4_users`.`email` AS `ia_user_mail`,
+        `jm4_users`.`block` AS `ia_user_active`,
+        `ia_finding_status`.`ia_findstat_name` AS `ia_findstat_name`,
+        `ia_finding_status`.`ia_findstat_private` AS `ia_findstat_private`,
+        `ia_finding_control`.`ia_findcont_auto` AS `ia_finding_control_ia_findcont_auto`,
+        `ia_finding_control`.`ia_findcont_name` AS `ia_findcont_name`,
+        `ia_finding_control`.`ia_findcont_value` AS `ia_findcont_value`,
+        `ia_finding_rate`.`ia_findrate_impact` AS `ia_findrate_impact`,
+        `ia_finding_rate`.`ia_findrate_name` AS `ia_findrate_name`,
+        `ia_finding_likelihood`.`ia_findlike_value` AS `ia_findlike_value`,
+        `ia_finding_likelihood`.`ia_findlike_name` AS `ia_findlike_name` 
+    FROM
+        ((((((((`ia_finding` `ia_finding` 
+    INNER JOIN
+        `ia_assignment` `ia_assignment` 
+            ON `ia_finding`.`ia_assi_auto` = `ia_assignment`.`ia_assi_auto`
+        ) 
+LEFT JOIN
+    `ia_assignment_status` `ia_assignment_status` 
+        ON `ia_assignment`.`ia_assistat_auto` = `ia_assignment_status`.`ia_assistat_auto`
+) 
+LEFT JOIN
+    `ia_assignment_category` `ia_assignment_category` 
+        ON `ia_assignment`.`ia_assicate_auto` = `ia_assignment_category`.`ia_assicate_auto`
+) 
+LEFT JOIN
+    `ia_assignment_type` `ia_assignment_type` 
+        ON `ia_assignment`.`ia_assitype_auto` = `ia_assignment_type`.`ia_assitype_auto`
+) 
+LEFT JOIN
+`jm4_users` `jm4_users` 
+    ON `ia_assignment`.`ia_user_sysid` = `jm4_users`.`id`
+) 
+LEFT JOIN
+`ia_finding_status` `ia_finding_status` 
+ON `ia_finding`.`ia_findstat_auto` = `ia_finding_status`.`ia_findstat_auto`
+) 
+LEFT JOIN
+`ia_finding_control` `ia_finding_control` 
+ON `ia_finding`.`ia_findcont_auto` = `ia_finding_control`.`ia_findcont_auto`
+) 
+LEFT JOIN
+`ia_finding_rate` `ia_finding_rate` 
+ON `ia_finding`.`ia_findrate_auto` = `ia_finding_rate`.`ia_findrate_auto`
+) 
+LEFT JOIN
+`ia_finding_likelihood` `ia_finding_likelihood` 
+ON `ia_finding`.`ia_findlike_auto` = `ia_finding_likelihood`.`ia_findlike_auto` 
+WHERE
+(
+`ia_assignment`.`ia_assi_year` = 2025
+AND `jm4_users`.`block` = 0
+AND `ia_assignment_category`.`ia_assicate_private` = '0'
+AND `ia_assignment_type`.`ia_assitype_private` = '0'
+AND `ia_finding_status`.`ia_findstat_private` = '0'
+AND `ia_finding`.`ia_find_private` = '0'
+AND `ia_finding`.`ia_find_appendix` = '0'
+) 
+OR (
+`ia_assignment`.`ia_assi_year` < 2025
+AND `ia_assignment`.`ia_assi_priority` < N'9'
+AND `jm4_users`.`block` = 0
+AND `ia_assignment_category`.`ia_assicate_private` = '0'
+AND `ia_assignment_type`.`ia_assitype_private` = '0'
+AND `ia_finding_status`.`ia_findstat_private` = '0'
+AND `ia_finding`.`ia_find_private` = '0'
+AND `ia_finding`.`ia_find_appendix` = '0'
+) 
+OR (
+`ia_assignment`.`ia_assi_finishdate` >= DATE '2024-10-01' 
+AND `ia_assignment`.`ia_assi_finishdate` <= DATE '2025-09-30'
+AND `jm4_users`.`block` = 0
+AND `ia_assignment_category`.`ia_assicate_private` = '0'
+AND `ia_assignment_type`.`ia_assitype_private` = '0'
+AND `ia_finding_status`.`ia_findstat_private` = '0'
+AND `ia_finding`.`ia_find_private` = '0'
+AND `ia_finding`.`ia_find_appendix` = '0'
+)
+ ) END_QUERY
+
+COMMENT Add priority descriptions
+
+OPEN FINDING_PERIOD
+DEFINE FIELD ia_assi_priority_text COMPUTED
+
+'Closed' IF ia_assi_priority = '9'
+'Continuous' IF ia_assi_priority = '8'
+'Follow-up' IF ia_assi_priority = '4'
+'High' IF ia_assi_priority = '3'
+'Medium' IF ia_assi_priority = '2'
+'Low' IF ia_assi_priority = '1'
+'Inactive'
+
+DEFINE FIELD ia_assi_finishdate_calc COMPUTED
+
+ia_assi_proofdate IF ia_assi_priority = '4'
+DATE(TODAY()) IF ia_assi_priority = '8'
+ia_assi_finishdate
+
+COMMENT Calculate the assignment closing date month for reporting purposes
+
+DEFINE FIELD assi_month COMPUTED '0000-00'
+
+COMMENT Calculate a simplified assignment status
+
+DEFINE FIELD assi_status_calc COMPUTED
+
+'1-NotStarted' IF SUBSTRING(ia_assistat_name,1,2) = '00'
+'2-Planning' IF SUBSTRING(ia_assistat_name,1,2) = '10'
+'3-Fieldwork<50%' IF VALUE(SUBSTRING(ia_assistat_name,1,2),0) >= 11 AND VALUE(SUBSTRING(ia_assistat_name,1,2),0) <= 50
+'4-Fieldwork>50%' IF VALUE(SUBSTRING(ia_assistat_name,1,2),0) >= 51 AND VALUE(SUBSTRING(ia_assistat_name,1,2),0) <= 79
+'5-DraftReport' IF VALUE(SUBSTRING(ia_assistat_name,1,2),0) >= 80 AND VALUE(SUBSTRING(ia_assistat_name,1,2),0) <= 99
+'6-Completed'
+
+COMMENT Calculate a simplified control effectiveness value 
+
+DEFINE FIELD assi_findcont_name_calc COMPUTED
+
+'0.10 Ineffective' IF ia_findcont_name = 'Ineffective'
+'0.10 Ineffective' IF ia_findcont_name = 'Inadequate control'
+'0.10 Ineffective' IF ia_findcont_name = 'Ineffective control'
+'0.10 Ineffective' IF ia_findcont_name = 'Non-compliance'
+'0.20 Requires improvement' IF ia_findcont_name = 'Requires improvement'
+'0.20 Requires improvement' IF ia_findcont_name = 'Room for improvement'
+'0.50 Satisfactory' IF ia_findcont_name = 'Satisfactory'
+'0.75 Good' IF ia_findcont_name = 'Good'
+'0.75 Good' IF ia_findcont_name = 'Effective control'
+'0.90 Highly effective' IF ia_findcont_name = 'Highly effective'
+'0.00 No value' IF ALLTRIM(ia_findcont_name) = 'No value'
+'0.00 No value' IF ALLTRIM(ia_findcont_name) = ''
+'0.00 No value' IF ia_findcont_name = 'Not applicable'
+ia_findcont_name
+
+DEFINE FIELD assi_findrate_name_calc COMPUTED
+
+'0 No rating' IF ia_findrate_name = ''
+'1 Minimal' IF ia_findrate_name = 'Recommendation'
+'1 Minimal' IF ia_findrate_name = 'Positive'
+'1 Minimal' IF ia_findrate_name = 'Positive control'
+'2 Minor' IF ia_findrate_name = 'Minor'
+'2 Minor' IF ia_findrate_name = 'Adjusted'
+'2 Minor' IF ia_findrate_name = 'Housekeeping control'
+'3 Significant' IF ia_findrate_name = 'Housekeeping'
+'3 Significant' IF ia_findrate_name = 'Less significant control'
+'4 Critical' IF ia_findrate_name = 'Significant'
+'4 Critical' IF ia_findrate_name = 'Important'
+'4 Critical' IF ia_findrate_name = 'Significant control'
+'5 Severe' IF ia_findrate_name = 'Critical'
+'5 Severe' IF ia_findrate_name = 'Critical weakness'
+'5 Severe' IF ia_findrate_name = 'Critical control'
+ia_findrate_name
+
+COMMENT Add number FIELDS
+
+DEFINE FIELD ia_findcont_number COMPUTED value(ia_findcont_value,2)
+DEFINE FIELD ia_findrate_number COMPUTED value(ia_findrate_impact,0)
+DEFINE FIELD ia_findlike_number COMPUTED value(ia_findlike_value,0)
+DEFINE FIELD ia_find_inherent_risk COMPUTED ia_findrate_number * ia_findlike_number
+DEFINE FIELD ia_find_residual_risk COMPUTED DEC(ia_find_inherent_risk * ia_findcont_number,2)
+
+COMMENT Add counter
+
+DEFINE FIELD counter COMPUTED 1
+
+COMMENT Sort the list
+
+OPEN FINDING_PERIOD
+COMMENT SORT ON ia_user_name ia_assicate_name ia_assitype_name ia_assi_name IF ia_user_active = '1' ia_assicate_private = '0' TO "FINDING_PERIOD_SORT.FIL" OPEN ISOLOCALE root
+SORT ON ia_user_name ia_assicate_name ia_assitype_name ia_assi_name TO "FINDING_PERIOD_SORT.FIL" OPEN ISOLOCALE root
+
+
+OPEN FINDING_PERIOD_SORT
+EXTRACT FIELDS ia_user_name AS 'Auditor' ia_user_active AS 'Auditor_active' ia_assignment_ia_assi_auto AS 'Assignment_file' ia_assi_year AS 'Year' ia_assicate_name AS 'Category' ia_assicate_private AS 'Category_private' ia_assitype_name AS 'Type' ia_assitype_private AS 'Type_private' ia_assi_name AS 'Assignment' ia_assi_priority AS 'Priority_value' ia_assi_priority_text AS 'Priority' ia_assistat_name AS 'Assignment_status' assi_status_calc AS 'Assignment_status_calc' ia_assi_proofdate AS 'Report_date' ia_assi_finishdate AS 'Closed_date' ia_assi_finishdate_calc AS 'Closed_date_calc' assi_month AS 'Closed_month' ia_find_auto AS 'Finding_file' ia_find_name AS 'Finding' ia_find_private AS 'Finding_private' ia_findstat_name AS 'Finding_status' ia_findstat_private AS 'Finding_status_private' ia_findcont_name AS 'Control' assi_findcont_name_calc AS 'Control_effectiveness' ia_findcont_number AS 'Control_effectiveness_number' assi_findrate_name_calc AS 'Impact_rating' ia_findrate_number AS 'Impact_rating_number' ia_findlike_name As 'Likelihood' ia_findlike_number AS 'Likelihood_number' ia_find_inherent_risk AS 'Inherent_risk' ia_find_residual_risk AS 'Residual_risk' ia_user_mail AS 'Auditor_email' counter AS 'Counter' TO "FINDING_CURR.FIL" OPEN
+
+OPEN FINDING_CURR
+EXPORT FIELDS ALL ACLGRC PASSWORD 1 TO "180913@eu" OVERWRITE
+
+COMMENT ENVIRONMENT RESET
+COMMENT ****************************************************************************************************
+
+CLOSE PRIMARY
+SET SAFETY ON

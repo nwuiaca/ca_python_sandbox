@@ -1,0 +1,18 @@
+﻿SELECT
+  X010_Studytrans.FDEBTCOLLECTIONSITE,
+  X010_Studytrans.MONTH,
+  X010_Studytrans.TRANSCODE,
+  X010_Studytrans.DESCRIPTION_E,
+  Sum(X010_Studytrans.AMOUNT) AS Sum_AMOUNT,
+  Sum(X010_Studytrans.AMOUNT_CR) AS Sum_AMOUNT_CR,
+  Sum(X010_Studytrans.AMOUNT_DT) AS Sum_AMOUNT_DT
+FROM
+  X010_Studytrans
+WHERE
+  X010_Studytrans.TRANSCODE <> '' AND
+  X010_Studytrans.MONTH <= '05'
+GROUP BY
+  X010_Studytrans.FDEBTCOLLECTIONSITE,
+  X010_Studytrans.MONTH,
+  X010_Studytrans.TRANSCODE,
+  X010_Studytrans.DESCRIPTION_E

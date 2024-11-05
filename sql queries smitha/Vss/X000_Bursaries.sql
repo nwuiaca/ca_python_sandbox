@@ -1,0 +1,25 @@
+﻿SELECT
+  X004ab_Bursary_site.KFINAIDSITEID,
+  X004ab_Bursary_site.FFINAIDID,
+  X004ab_Bursary_site.FSITEORGUNITNUMBER,
+  X004ab_Bursary_site.FFINAIDINSTBUSENTID,
+  X004ab_Bursary_site.FINAIDCODE,
+  X004ab_Bursary_site.FINAIDNAME,
+  X004ab_Bursary_site.FINAIDNAAM,
+  X004ab_Bursary_site.TYPE_E,
+  X004ab_Bursary_site.BURS_CATE_E,
+  X004ab_Bursary_site.ISAUTOAPPL,
+  X004ab_Bursary_site.ISWWWAPPLALLOWED,
+  X004ab_Bursary_site.FINAIDYEARS,
+  X004ab_Bursary_site.FUND_TYPE_E,
+  X004ab_Bursary_site.STUDY_TYPE_E,
+  X004ab_Bursary_site.CC,
+  X004ab_Bursary_site.ACC,
+  X004ab_Bursary_site.LOANTYPECODE,
+  X004ab_Bursary_site.STARTDATE,
+  X004ab_Bursary_site.ENDDATE,
+  X004ab_Bursary_site.FCOAID
+FROM
+  X004ab_Bursary_site
+ORDER BY
+  X004ab_Bursary_site.KFINAIDSITEID

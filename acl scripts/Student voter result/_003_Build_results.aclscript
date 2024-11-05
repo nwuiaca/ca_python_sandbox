@@ -1,0 +1,47 @@
+SET FOLDER /_003_Results
+
+COMMENT ASSIGN v_question = ""
+COMMENT ACCEPT "QuestionID?" TO v_question
+COMMENT OPEN _001aa_imp_data
+COMMENT EXTRACT RECORD IF Question_ID = VALUE(v_question,0) TO "_003aa_extr_data" OPEN
+
+COMMENT Build the portfolio list and order
+COMMENT 003aa
+OPEN _001ac_Imp_qamap
+SUMMARIZE ON Question_ID Question TO "_003aa_Portfolios.FIL" OPEN PRESORT ISOLOCALE root
+DEFINE FIELD Question_Order COMPUTED RECNO()
+
+COMMENT Count the number of votes per question id
+OPEN _002xx_Valid_votes
+SUMMARIZE ON Question_ID Answer_Text TO "_003ab_Votes.FIL" OPEN PRESORT ISOLOCALE root
+
+COMMENT Build votes per candidate
+OPEN _003ab_Votes
+OPEN _003aa_Portfolios SECONDARY
+JOIN PKEY Question_ID FIELDS Answer_Text COUNT SKEY Question_ID WITH Question Question_ID Question_order PRIMARY TO "_003ac_Votes_per_candidate" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+DEFINE FIELD Votes COMPUTED COUNT
+
+COMMENT Build votes per portfolio
+OPEN _003ac_Votes_per_candidate
+SUMMARIZE ON Question_Order SUBTOTAL COUNT OTHER Question_ID Question TO "_003ad_Votes_per_portfolio.FIL" OPEN PRESORT ISOLOCALE root
+DEFINE FIELD Votes_per_portfolio COMPUTED COUNT
+
+COMMENT Combine voting totals and calculate voting percentage
+OPEN _003ac_Votes_per_candidate
+OPEN _003ad_Votes_per_portfolio SECONDARY
+JOIN PKEY Question_ID FIELDS Answer_Text Question Question_ID Question_Order Votes SKEY Question_ID WITH Votes_per_portfolio TO "_003ae_Add_votes_per_portfolio" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+DEFINE FIELD Percent COMPUTED ((DEC(Votes,4) / DEC(Votes_per_portfolio,2)) * 100)
+
+COMMENT Sort votes per portfolio and top candidate first
+OPEN _003ae_Add_votes_per_portfolio
+SORT ON Question_Order Votes  D  TO "_003af_sort_votes_per_portfolio" OPEN ISOLOCALE root
+
+COMMENT Build final results
+OPEN _003af_sort_votes_per_portfolio
+EXTRACT FIELDS Question_Order Question Answer_Text Votes Votes_per_portfolio Percent TO "_003ag_Final_results" OPEN
+
+SUMMARIZE ON Question_Order Question TO SCREEN PRESORT ISOLOCALE root
+
+SET FOLDER TO /

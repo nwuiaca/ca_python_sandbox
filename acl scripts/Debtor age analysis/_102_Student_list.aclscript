@@ -1,0 +1,71 @@
+COMMENT ****************************************************************************************************
+COMMENT *** Script to isolate the student debtors transactions for the specific list of students
+COMMENT ****************************************************************************************************
+
+COMMENT
+Author: Albert Janse van Rensburg (Pers 21162395)
+  Date: 22 Mar 2017
+END
+
+COMMENT
+Updates:
+END 
+
+COMMENT
+Notes:
+01.
+END
+
+COMMENT
+Process/Procedures:
+01.
+END
+
+COMMENT
+Prelimanary variables needed:
+01.v_dispscm (Script complete message)
+Prelimanary files needed:
+01.Import\Studlist.txt (List of students to be evaluated)
+02._101_Merge_data (Script)
+03._101_Tran_all
+END
+
+COMMENT
+Results:
+01.
+END
+
+COMMENT ****************************************************************************************************
+COMMENT *** Set the environment
+COMMENT ****************************************************************************************************
+
+SET FOLDER TO /_102_Stud_list
+
+COMMENT ****************************************************************************************************
+COMMENT *** Import and manipulate the list of students
+COMMENT ****************************************************************************************************
+
+COMMENT *** Import the list of students
+
+COMMENT IMPORT EXCEL TO "_102aa_Import_stud.fil" FROM "Import\Studlist.xlsx" TABLE "Sheet1$" KEEPTITLE FIELD "STUDLIST" C WID 8 AS ""
+IMPORT DELIMITED TO _102aa_Import_stud "_102aa_Import_stud.fil" FROM "Import\Studlist.txt" 0 SEPARATOR "," QUALIFIER NONE CONSECUTIVE STARTLINE 1 FIELD "STUDLIST" C AT 1 DEC 0 WID 16 PIC "" AS "" 
+
+COMMENT *** Select the transactions belonging to the students list 
+
+OPEN _103_Tran_all
+OPEN _102aa_Import_stud SECONDARY
+JOIN PKEY STUDENT FIELDS ACTDATE AMOUNT BESKRYWING BURSARY CAMP_D CAMP_S DESCRIPTION MODULE MONTH POSTDATED QUALIFICATION STUDENT TRANCODE TRANDATE TRANYEAR YEAR SKEY STUDLIST WITH STUDLIST IF YEAR >= v_year_s AND YEAR <= v_year_t TO "_102ab_Stud_tran.FIL" PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+COMMENT *** Summarize the transaction types
+OPEN _102ab_Stud_tran
+SUMMARIZE ON TRANCODE SUBTOTAL AMOUNT OTHER DESCRIPTION TO "_102ac_Summ_tran.FIL" OPEN PRESORT
+
+COMMENT *** Display message to signify the end of script 
+IF v_dispscm = "1" PAUSE "Vss script completed!"
+
+COMMENT ****************************************************************************************************
+COMMENT *** Restore the environment
+COMMENT ****************************************************************************************************
+
+SET FOLDER TO /

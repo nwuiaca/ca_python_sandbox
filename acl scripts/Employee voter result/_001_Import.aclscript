@@ -1,0 +1,32 @@
+COMMENT Import data for all voting sites
+
+COMMENT Ask for the data folder
+ASSIGN v_folder = "Import\"
+COMMENT ACCEPT "Data folder?" TO v_folder
+
+SET FOLDER /_001_Import
+SET SAFETY OFF    
+
+COMMENT Import the voters roll
+IMPORT EXCEL TO _001aa_Votersroll "_001aa_Votersroll.fil" FROM "Import\Votersroll_roald.xlsx" TABLE "3months$" KEEPTITLE FIELD "DIVISION_FACULTY" C WID 80 AS "" FIELD "LOCATION" C WID 30 AS "" FIELD "ORGANIZATION" C WID 80 AS "" FIELD "FULL_NAME" C WID 60 AS "" FIELD "EMPLOYEE_NUMBER" N WID 8 DEC 0 AS "" FIELD "TITLE" C WID 10 AS "" FIELD "LAST_NAME" C WID 40 AS "" FIELD "INITIALS" C WID 10 AS "" FIELD "PREFERRED_NAME" C WID 30 AS "" FIELD "USER_PERSON_TYPE" C WID 40 AS "" FIELD "ACADEMIC_SUPPORT" C WID 40 AS "" FIELD "POSITION_STRING" C WID 100 AS "" FIELD "POSITION_NAME" C WID 100 AS "" FIELD "NRF_OPTION" N WID 2 DEC 0 AS "" FIELD "EMAIL_ADDRESS" C WID 50 AS "" FIELD "NATIONAL_IDENTIFIER" C WID 15 AS "" FIELD "PASSPORT" C WID 15 AS "" FIELD "NATIONALITY" C WID 50 AS "" FIELD "WORK_PHONE" C WID 12 AS "" FIELD "CELLPHONE" C WID 12 AS "" FIELD "CORR_LANGUAGE" C WID 15 AS ""
+DEFINE FIELD STUDENT COMPUTED EMPLOYEE_NUMBER
+DEFINE FIELD NAME COMPUTED FULL_NAME
+DEFINE FIELD CAMPUS COMPUTED LOCATION
+DEFINE FIELD VOTE_REASON COMPUTED "ON VOTERS ROLL"
+
+COMMENT Import the mapping data
+IMPORT DELIMITED TO _001ac_Imp_qamap "_001ac_Imp_qamap.fil" FROM "Import\QuestionPro-SR-QAMapping.csv" 0 SEPARATOR "," QUALIFIER '"' CONSECUTIVE STARTLINE 3 KEEPTITLE FIELD "Question_ID" N AT 1 DEC 0 WID 24 PIC "" AS "" FIELD "Question_Code" C AT 25 DEC 0 WID 20 PIC "" AS "" FIELD "Question" C AT 45 DEC 0 WID 200 PIC "" AS "" FIELD "Question_Type" C AT 245 DEC 0 WID 20 PIC "" AS "" FIELD "Answer_ID" N AT 265 DEC 0 WID 24 PIC "" AS "" FIELD "Answer_Code" C AT 289 DEC 0 WID 20 PIC "" AS "" FIELD "Answer" C AT 309 DEC 0 WID 200 PIC "" AS "" 
+
+COMMENT Import the response meta data
+IMPORT DELIMITED TO _001ad_Imp_meta "_001ad_Imp_meta.fil" FROM "Import\QuestionPro-SR-ResponseSetMetaData.csv" 0 SEPARATOR "," QUALIFIER '"' CONSECUTIVE STARTLINE 3 KEEPTITLE FIELD "Response_ID" N AT 1 DEC 0 WID 24 PIC "" AS "" FIELD "IP_Address" C AT 25 DEC 0 WID 40 PIC "" AS "" FIELD "Timestamp" D AT 65 DEC 0 WID 38 PIC "DD/MM/YYYY HH:MM:SS" AS "" FIELD "Duplicate" C AT 103 DEC 0 WID 20 PIC "" AS "" FIELD "Time_Taken" N AT 123 DEC 0 WID 10 PIC "" AS "" FIELD "Seq_Number" C AT 133 DEC 0 WID 20 PIC "" AS "" FIELD "External_Reference" C AT 153 DEC 0 WID 40 PIC "" AS "" FIELD "Custom_Variable_1" C AT 193 DEC 0 WID 100 PIC "" AS "" FIELD "Custom_Variable_2" C AT 293 DEC 0 WID 100 PIC "" AS "" FIELD "Custom_Variable_3" C AT 393 DEC 0 WID 100 PIC "" AS "" FIELD "Custom_Variable_4" C AT 493 DEC 0 WID 100 PIC "" AS "" FIELD "Custom_Variable_5" C AT 593 DEC 0 WID 100 PIC "" AS "" FIELD "Respondent_Email" C AT 693 DEC 0 WID 100 PIC "" AS "" FIELD "Country_Code" C AT 793 DEC 0 WID 20 PIC "" AS "" FIELD "Region" C AT 813 DEC 0 WID 20 PIC "" AS "" FIELD "Language" C AT 833 DEC 0 WID 20 PIC "" AS "" 
+DEFINE FIELD Local_ID COMPUTED VALUE(SUBSTRING(Custom_Variable_1,1,8),0)
+
+COMMENT Import the response data
+IMPORT DELIMITED TO _001ae_Imp_data "_001ae_Imp_data.fil" FROM "Import\QuestionPro-SR-Data.csv" 0 SEPARATOR "," QUALIFIER '"' CONSECUTIVE STARTLINE 3 KEEPTITLE FIELD "Response_ID" N AT 1 DEC 0 WID 24 PIC "" AS "" FIELD "Timestamp" D AT 25 DEC 0 WID 38 PIC "DD/MM/YYYY HH:MM:SS" AS "" FIELD "Question_ID" N AT 63 DEC 0 WID 24 PIC "" AS "" FIELD "Answer_ID" N AT 87 DEC 0 WID 24 PIC "" AS "" FIELD "Answer_Text" C AT 111 DEC 0 WID 200 PIC "" AS "" 
+
+COMMENT Import the response meta status
+IMPORT EXCEL TO _001af_Rawdata "_001af_Rawdata.fil" FROM "Import\QuestionPro-SR-RawData.xlsx" TABLE "Raw Data$" KEEPTITLE FIELD "Response_ID" N WID 10 DEC 0 AS "" FIELD "Response_Status" C WID 10 AS "" FIELD "IP_Address" C WID 40 AS "" FIELD "Timestamp__dd_mm_yyyy_" D WID 19 PIC "YYYY-MM-DD hh:mm:ss" AS "" FIELD "Duplicate" C WID 1 AS "" FIELD "Time_Taken_to_Complete__Seconds_" N WID 4 DEC 0 AS "" FIELD "Seq__Number" N WID 1 DEC 0 AS "" FIELD "External_Reference" C WID 15 AS "" FIELD "Custom_Variable_1" C WID 20 AS "" FIELD "Custom_Variable_2" C WID 20 AS "" FIELD "Custom_Variable_3" C WID 20 AS "" FIELD "Custom_Variable_4" C WID 20 AS "" FIELD "Custom_Variable_5" C WID 50 AS "" FIELD "Respondent_Email" C WID 50 AS "" FIELD "Email_List" C WID 50 AS "" FIELD "Country_Code" C WID 10 AS "" FIELD "Region" C WID 10 AS "" FIELD "Country" C WID 30 AS "" FIELD "Longitude" N WID 10 DEC 4 AS "" FIELD "Latitude" N WID 10 DEC 4 AS "" FIELD "Radius" N WID 1 DEC 0 AS "" FIELD "Browser" C WID 30 AS "" FIELD "Device" C WID 30 AS "" FIELD "Operating_System" C WID 30 AS "" FIELD "Language" C WID 7 AS ""
+
+CLOSE PRIMARY
+SET FOLDER TO /
+

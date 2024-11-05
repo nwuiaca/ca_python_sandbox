@@ -1,0 +1,64 @@
+COMMENT ****************************************************************************************************
+COMMENT *** Script to set the environment
+COMMENT ****************************************************************************************************
+
+COMMENT
+Author: Albert Janse van Rensburg (Pers 21162395)
+  Date: 22 Mar 2017
+END
+
+COMMENT
+Updates:
+END 
+
+COMMENT
+Notes:
+01.
+END
+
+COMMENT
+Process/Procedures:
+01.
+END
+
+COMMENT
+Prelimanary variables needed:
+01.
+Prelimanary files needed:
+01.
+END
+
+COMMENT
+Results:
+01.
+END
+
+COMMENT ****************************************************************************************************
+COMMENT *** Set the environment
+COMMENT ****************************************************************************************************
+
+COMMENT *** Ask for the start year 
+
+ASSIGN v_year_s = "2013"
+ACCEPT "Include years from?" TO v_year_s
+
+COMMENT *** Ask for the start year 
+
+ASSIGN v_year_t = "2023"
+ACCEPT "Include years to?" TO v_year_t
+
+COMMENT *** Ask for the report file name 
+
+ASSIGN v_rep_name = ""
+ACCEPT "Report name?" TO v_rep_name
+
+COMMENT *** Ask whether end of script messages should be displayed
+
+ASSIGN v_dispscm = "0"
+ACCEPT "Display script completed message? (0=No 1=Yes)" TO v_dispscm
+
+COMMENT ****************************************************************************************************
+COMMENT *** Restore the environment
+COMMENT ****************************************************************************************************
+
+SET FOLDER TO /

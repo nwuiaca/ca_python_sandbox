@@ -1,0 +1,35 @@
+﻿Select
+    p.EMPLOYEE,
+    p.NAME,
+    p.GENDER,
+    p.RACE,
+    p.LANGUAGE,
+    p.LOCATION,
+    p.ACAD_SUPP,
+    p.FACULTY,
+    p.DIVISION,
+    p.CATEGORY,
+    p.POS_GRADE,
+    p.JOB_NAME,
+    p.PERSON_TYPE,
+    p.AGE,
+    p.SUPERVISOR,
+    p.EMP_START,
+    d.DECLARATION_ID,
+    d.DECLARATION_DATE,
+    d.CREATION_DATE,
+    d.UNDERSTAND_POLICY,
+    d.INTERESTS_TO_DECLARE,
+    d.FULL_DISCLOSURE,
+    d.DECLARE_STATUS,
+    d.LINE_MANAGER,
+    d.REJECTION_REASON,
+    u.LAST_PAYMENT_DATE As UIF_PAY_DATE,
+    u.COUNT_PAYMENTS As UIF_PAY_COUNT,
+    f.LAST_PAYMENT_DATE As FOREIGN_PAY_DATE,
+    f.COUNT_PAYMENTS As FOREIGN_PAY_COUNT
+From
+    X003aa_people_curr p Left Join
+    X003ab_declarations_curr d On d.EMPLOYEE = p.EMPLOYEE Left Join
+    X003_uif_payments u On p.EMPLOYEE = u.EMPLOYEE_NUMBER Left Join
+    X003_foreign_payments f On p.EMPLOYEE = f.EMPLOYEE_NUMBER

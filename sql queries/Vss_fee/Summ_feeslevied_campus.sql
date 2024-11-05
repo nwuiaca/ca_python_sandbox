@@ -1,0 +1,13 @@
+﻿Select
+    STUD.CAMPUS,
+    STUD.FEE_LEVIED_TYPE,
+    STUD.FEE_SHOULD_BE,
+    Count(STUD.KSTUDBUSENTID) As COUNT,
+    STUD.VALID
+From
+    X020ba_Student_master STUD
+Group By
+    STUD.CAMPUS,
+    STUD.FEE_LEVIED_TYPE,
+    STUD.FEE_SHOULD_BE,
+    STUD.VALID

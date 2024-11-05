@@ -1,0 +1,292 @@
+--MPS MARKS
+
+
+SELECT mes.kstudbusentid AS student,
+       p.initials,
+       p.surname,
+       parex.externalreferencenumber AS idnumber,
+       bet.telephonenumber AS cellphone,
+       a.address AS email,
+       cd_nat.codelongdescription AS nationality,
+       qual.qualificationcode || fos.qualificationfieldofstudy ||
+       qlevel.qualificationlevel AS qual,
+       removespecialcharacters((SELECT aps.shortdescription
+                                 FROM academicprogramshortname aps
+                                WHERE aps.facademicprogramid =
+                                      qlevel.kacademicprogramid
+                                  AND aps.fsystemlanguagecodeid = 3
+                                  AND aps.fnamepurposecodeid = 7294
+                                  AND aps.startdate <= SYSDATE
+                                  AND (aps.enddate >= SYSDATE OR
+                                      aps.enddate IS NULL)),
+                               0) qualname,
+       pgm.programcode AS curriculum,
+       cd_qenrolcat.codelongdescription AS qual_mod,
+       cd_coursegroup.codelongdescription || ' (' || oun.shortname || ' - ' ||
+       oui.forgunitnumber || ' - ' || cd_coursegroup.fcode || ')' AS coursegroup,
+       c.coursecode || cl.courselevel || m.coursemodule AS modulecode,
+       cd_modperiod.codelongdescription || ' / ' || mpepc.startmonth AS modperiod,
+       cd_modenrolcat.codelongdescription AS module_mod,
+       cd_modprescat.codelongdescription AS module_pres,
+       ma.description AS evaluation,
+       CASE
+        WHEN ma.fresultgroupid IS NULL THEN 'General'
+        ELSE 'Specific'
+       END EvaluationType,
+       ar.markentered AS evalmark,
+       CASE
+        WHEN ar.ismarkfinal = 1 THEN 'Yes'
+        ELSE 'No'
+       END AS MarkFinalised
+  FROM moduleenrolstud mes
+-- party-related
+ INNER JOIN party p
+    ON p.kbusinessentityid = mes.kstudbusentid
+  LEFT JOIN partyexternalreference parex
+    ON parex.kbusinessentityid = p.kbusinessentityid
+   AND parex.kexternalreferencecodeid = 6525 -- id number             
+  LEFT JOIN businessentitytelephone bet
+    ON bet.kbusinessentityid = p.kbusinessentityid
+   AND bet.ktelephonepurposecodeid = 6507 -- cellphone             
+  LEFT JOIN businessentityaddrpurpose beap
+    ON beap.kbusinessentityid = p.kbusinessentityid
+   AND beap.kaddresspurposecodeid = 7395 -- email       
+   AND beap.kstartdate <= SYSDATE
+   AND (beap.enddate >= SYSDATE OR beap.enddate IS NULL)
+  LEFT JOIN address a
+    ON a.kaddressid = beap.kaddressid
+  LEFT JOIN codedescription cd_nat
+    ON cd_nat.kcodedescid = p.fnationalitycodeid
+   AND cd_nat.ksystemlanguagecodeid = 3
+--qual
+ INNER JOIN quallevelenrolstud qles
+    ON qles.kenrolstudid = mes.fquallevelenrolstudid
+   AND qles.kstudbusentid = mes.kstudbusentid
+   AND qles.startdate <= '31-Dec-2023'
+   AND qles.enddate >= '1-Jan-2023'
+ INNER JOIN presentouenrolpresentcat ql_pouepc
+    ON ql_pouepc.kenrolmentpresentationid = qles.fenrolmentpresentationid
+ INNER JOIN quallevelpresentingou qlpou
+    ON qlpou.kpresentingouid = ql_pouepc.fqualpresentingouid
+ INNER JOIN qualificationlevel qlevel
+    ON qlevel.kacademicprogramid = qlpou.fquallevelapid
+ INNER JOIN fieldofstudy fos
+    ON fos.kacademicprogramid = qlevel.ffieldofstudyapid
+ INNER JOIN qualification qual
+    ON qual.kacademicprogramid = fos.fqualificationapid
+ INNER JOIN program pgm
+    ON pgm.kacademicprogramid = qles.fprogramapid
+ INNER JOIN codedescription cd_qenrolcat
+    ON cd_qenrolcat.kcodedescid = ql_pouepc.fenrolmentcategorycodeid
+   AND cd_qenrolcat.ksystemlanguagecodeid = 3
+--module
+ INNER JOIN presentouenrolpresentcat mod_pouepc
+    ON mod_pouepc.kenrolmentpresentationid = mes.fenrolmentpresentationid
+ INNER JOIN modulepresentingou mpou
+    ON mpou.kpresentingouid = mod_pouepc.fmodulepresentingouid
+ INNER JOIN module m
+    ON m.kacademicprogramid = mpou.fmoduleapid
+ INNER JOIN courselevel cl
+    ON cl.kacademicprogramid = m.fcourselevelapid
+ INNER JOIN course c
+    ON c.kacademicprogramid = cl.fcourseapid
+ INNER JOIN modperiodenrolprescat mpepc
+    ON mpepc.kenrolmentpresentationid = mes.fmodperiodenrolprescatid
+ INNER JOIN codedescription cd_modperiod
+    ON cd_modperiod.kcodedescid = mpepc.fmoduleperiodcodeid
+   AND cd_modperiod.ksystemlanguagecodeid = 3
+ INNER JOIN codedescription cd_modenrolcat
+    ON cd_modenrolcat.kcodedescid = mod_pouepc.fenrolmentcategorycodeid
+   AND cd_modenrolcat.ksystemlanguagecodeid = 3
+ INNER JOIN codedescription cd_modprescat
+    ON cd_modprescat.kcodedescid = mod_pouepc.fpresentationcategorycodeid
+   AND cd_modprescat.ksystemlanguagecodeid = 3
+ INNER JOIN codedescription cd_coursegroup
+    ON cd_coursegroup.kcodedescid = mpou.fcoursegroupcodeid
+   AND cd_coursegroup.ksystemlanguagecodeid = 3
+ INNER JOIN orgunitinstance oui
+    ON oui.kbusinessentityid = mpou.fbusinessentityid
+ INNER JOIN orgunitname oun
+    ON oun.korgunitnumber = oui.forgunitnumber
+   AND oun.ksystemlanguagecodeid = 3
+--mark
+ INNER JOIN enrolmentgroupstructure egs
+    ON egs.fenrolmentcategorycodeid = mod_pouepc.fenrolmentcategorycodeid
+ INNER JOIN classgroup cg
+    ON cg.fpresentingouid = mpou.kpresentingouid
+   AND cg.enddate >= '1-Jan-2023'
+   AND cg.startdate <= '31-Dec-2023'
+   AND cg.iscancelled = 0
+   AND cg.fenrolmentgroupid = egs.kenrolmentgroupid
+   AND cg.fmoduleperiodcodeid = mpepc.fmoduleperiodcodeid
+   AND cg.startmonth = mpepc.startmonth
+ INNER JOIN classgroupstudent cgs
+    ON cgs.kbusinessentityid = mes.kstudbusentid
+   AND cgs.kclassgroupid = cg.kclassgroupid
+ INNER JOIN markassesment ma
+    ON (ma.fclassgroupid = cg.kclassgroupid OR
+       ma.fclassgroupid = cg.fparentclassgroupid)
+   AND (ma.enddate IS NULL OR ma.enddate >= SYSDATE)
+ INNER JOIN assesmentresult ar                                         -- for all registrations change this join to LEFT OUTER JOIN
+    ON ar.fmarkassesmentid = ma.kmarkassesmentid
+   AND (ar.fclassgroupid = cg.kclassgroupid OR
+       ar.fclassgroupid = cg.fparentclassgroupid)
+   AND ar.fstudentbusentityid = mes.kstudbusentid
+ WHERE mes.startdate <= '31-Dec-2023'
+   AND mes.enddate >= '1-Jan-2023'
+   AND mod_pouepc.fpresentationcategorycodeid = 7243 -- Distance  (7242 -- Contact)
+   AND mod_pouepc.fenrolmentcategorycodeid <> 1000585 -- short course
+   --AND ((cd_modperiod.codelongdescription || ' / ' || mpepc.startmonth = 'First semester / 2') OR (cd_modperiod.codelongdescription LIKE 'Year%'))
+   --AND ma.description LIKE 'Part%'
+ORDER BY c.coursecode || cl.courselevel || m.coursemodule,mes.kstudbusentid
+
+
+
+
+
+--STE MARKS
+
+SELECT DISTINCT STUDQUAL.KSTUDBUSENTID STUDENTNO,
+                PARTY.INITIALS,
+                PARTY.FIRSTNAMES,
+                PARTY.SURNAME,
+                PARTY.DATEOFBIRTH,
+                GENDER.CODELONGDESCRIPTION SEX,
+                (Select pex.externalreferencenumber from partyexternalreference pex
+                where pex.kexternalreferencecodeid = 6525 --ID number type
+                and sysdate between pex.startdate and nvl(pex.enddate, sysdate + 1)
+                and pex.kbusinessentityid = STUDQUAL.kstudbusentid) IDNUMBER,
+
+                (Select bep.telephonenumber from businessentitytelephone bep
+                where bep.ktelephonepurposecodeid = '6507' --cellphone
+                and sysdate between nvl(bep.startdate, sysdate - 1) and nvl(bep.enddate, sysdate + 1)
+                and bep.kbusinessentityid = STUDQUAL.kstudbusentid) CellphoneNo,
+
+                (Select ad.address
+                from BUSINESSENTITYADDRPURPOSE bap
+                , address ad
+                where bap.kbusinessentityid = STUDQUAL.kstudbusentid
+                and ad.kaddressid = bap.kaddressid
+                and bap.kaddresspurposecodeid = 7395 --postal address
+                and sysdate between ad.startdate and nvl(ad.enddate, sysdate + 1)
+                and sysdate between bap.kstartdate and nvl(bap.enddate, sysdate + 1)) EMAIL,
+
+                ORGNAMECAMPUS.LONGNAME CAMPUS,
+                ORGNAMEFAC.LONGNAME FACULTY,
+                QUALIFICATION.QUALIFICATIONCODE || ' ' || FIELDOFSTUDY.QUALIFICATIONFIELDOFSTUDY || ' ' || QUALIFICATIONLEVEL.qualificationlevel AS QUALIFICATIONLEVEL,
+                PROGRAM.PROGRAMCODE,
+                STUDQUAL.ENROLHISTORYYEAR HISTORICYEAR,
+                ENTRYLEVEL.CODELONGDESCRIPTION ENTRYLEVELCODE,
+                STUDQUAL.DATEENROL REGISTRATIONDATE,
+                PRESCAT.CODESHORTDESCRIPTION AS PRESENTATIONCATEGORY,
+                ACADEMICPROGRAMSHORTNAME.SHORTDESCRIPTION QUALIFICATIONDESCRIPTION,
+                COURSE.COURSECODE || COURSELEVEL.COURSELEVEL || MODULE.COURSEMODULE ModuleCode,
+                MODULETYPE.FCODE MODULETYPECODE,
+                MODULETYPE.CODELONGDESCRIPTION MODULETYPEDESCRIPTION,
+                MODPERIOD.CODESHORTDESCRIPTION MODULEPERIOD,
+                MODMVA.CODESHORTDESCRIPTION MODULEMOD,
+				
+				, (Select FMR.MARKACHIEVED 
+				from FINALMODULERESULT FMR
+				Where FMR.KSTUDBUSENTID = SAO.KSTUDBUSENTID
+				and FMR.KENROLSTUDID = SAO.KENROLSTUDID
+				and FMR.KSTUDASSESID = SAO.KSTUDASSESID
+				and FMR.FMARKTYPECODEID = 7107) SemesterMark
+
+				, (Select FMR.MARKACHIEVED 
+				from FINALMODULERESULT FMR
+				Where FMR.KSTUDBUSENTID = SAO.KSTUDBUSENTID
+				and FMR.KENROLSTUDID = SAO.KENROLSTUDID
+				and FMR.KSTUDASSESID = SAO.KSTUDASSESID
+				and FMR.FMARKTYPECODEID = 7108) ExaminationMark
+
+				, (Select FMR.MARKACHIEVED 
+				from FINALMODULERESULT FMR
+				Where FMR.KSTUDBUSENTID = SAO.KSTUDBUSENTID
+				and FMR.KENROLSTUDID = SAO.KENROLSTUDID
+				and FMR.KSTUDASSESID = SAO.KSTUDASSESID
+				and FMR.FMARKTYPECODEID = 7109) ModuleMark
+
+							
+                (select CD.CODESHORTDESCRIPTION
+                  from CODEDESCRIPTION CD
+                 where CD.KSYSTEMLANGUAGECODEID = 3
+                 and CD.KCODEDESCID =
+                 (Select FMR.FRESULTCODEID
+                      from FINALMODULERESULT FMR
+                      Where FMR.KSTUDBUSENTID = SAO.KSTUDBUSENTID
+                      and FMR.KENROLSTUDID = SAO.KENROLSTUDID
+                      and FMR.KSTUDASSESID = SAO.KSTUDASSESID
+                      and FMR.FMARKTYPECODEID = 7109)
+                 ) MODULERESULT
+
+
+                
+FROM QUALLEVELENROLSTUD STUDQUAL
+INNER JOIN PARTY ON STUDQUAL.KSTUDBUSENTID = PARTY.KBUSINESSENTITYID
+INNER JOIN PRESENTOUENROLPRESENTCAT GLOBALPRESCAT ON STUDQUAL.FENROLMENTPRESENTATIONID = GLOBALPRESCAT.KENROLMENTPRESENTATIONID
+INNER JOIN QUALLEVELPRESENTINGOU QUALPRESCAT ON GLOBALPRESCAT.FQUALPRESENTINGOUID = QUALPRESCAT.KPRESENTINGOUID
+INNER JOIN QUALIFICATIONLEVEL ON QUALPRESCAT.FQUALLEVELAPID = QUALIFICATIONLEVEL.KACADEMICPROGRAMID
+INNER JOIN FIELDOFSTUDY ON QUALIFICATIONLEVEL.FFIELDOFSTUDYAPID = FIELDOFSTUDY.KACADEMICPROGRAMID
+INNER JOIN QUALIFICATION ON FIELDOFSTUDY.FQUALIFICATIONAPID = QUALIFICATION.KACADEMICPROGRAMID
+INNER JOIN PROGRAM ON STUDQUAL.FPROGRAMAPID = PROGRAM.KACADEMICPROGRAMID
+                AND FIELDOFSTUDY.KACADEMICPROGRAMID = PROGRAM.FFIELDOFSTUDYAPID
+INNER JOIN ACADEMICPROGRAMSHORTNAME ON PROGRAM.KACADEMICPROGRAMID = ACADEMICPROGRAMSHORTNAME.FACADEMICPROGRAMID
+                AND ACADEMICPROGRAMSHORTNAME.FSYSTEMLANGUAGECODEID = 3
+INNER JOIN CODEDESCRIPTION QUALMOD ON GLOBALPRESCAT.FENROLMENTCATEGORYCODEID = QUALMOD.KCODEDESCID
+                AND QUALMOD.KSYSTEMLANGUAGECODE = 3
+INNER JOIN CODEDESCRIPTION PRESCAT ON GLOBALPRESCAT.FPRESENTATIONCATEGORYCODEID = PRESCAT.KCODEDESCID
+                AND PRESCAT.KSYSTEMLANGUAGECODE = 3
+INNER JOIN CODEDESCRIPTION GENDER ON PARTY.FGENDERCODEID = GENDER.KCODEDESCID
+            AND GENDER.KSYSTEMLANGUAGECODEID = 3
+            AND GENDER.FCODEINDEX = 'GESLAG'
+LEFT OUTER JOIN ORGUNITINSTANCE ORGINTFAC ON QUALPRESCAT.FBUSINESSENTITYID = ORGINTFAC.KBUSINESSENTITYID
+LEFT OUTER JOIN ORGUNITNAME ORGNAMECAMPUS ON ORGINTFAC.FSITEORGUNITNUMBER = ORGNAMECAMPUS.KORGUNITNUMBER
+            AND ORGNAMECAMPUS.ksystemlanguagecodeid = 3
+            AND ORGNAMECAMPUS.ENDDATE IS NULL
+LEFT OUTER JOIN ORGUNITNAME ORGNAMEFAC ON ORGINTFAC.FORGUNITNUMBER = ORGNAMEFAC.KORGUNITNUMBER
+            AND ORGNAMEFAC.ksystemlanguagecodeid = 3
+            AND ORGNAMEFAC.ENDDATE IS NULL
+LEFT OUTER JOIN ORGUNIT OUFAC ON ORGNAMEFAC.KORGUNITNUMBER = OUFAC.KORGUNITNUMBER
+            AND OUFAC.ENDDATE IS NULL
+LEFT OUTER JOIN CODEDESCRIPTION FACULTY ON OUFAC.FORGUNITTYPECODEID = FACULTY.KCODEDESCID
+            AND FACULTY.KSYSTEMLANGUAGECODEID = 3
+            AND FACULTY.FCODE = 'FAKT'
+LEFT OUTER JOIN CODEDESCRIPTION ENTRYLEVEL ON STUDQUAL.FENTRYLEVELCODEID = ENTRYLEVEL.KCODEDESCID
+            AND ENTRYLEVEL.KSYSTEMLANGUAGECODEID = 3
+            AND ENTRYLEVEL.FCODEINDEX = 'SANSKLAS'
+        
+            
+--MODULE
+INNER JOIN MODULEENROLSTUD STUDMOD ON STUDQUAL.KENROLSTUDID = STUDMOD.FQUALLEVELENROLSTUDID
+INNER JOIN PRESENTOUENROLPRESENTCAT MODPRESCAT ON STUDMOD.FENROLMENTPRESENTATIONID = MODPRESCAT.KENROLMENTPRESENTATIONID
+INNER JOIN MODULEPRESENTINGOU ON MODPRESCAT.FMODULEPRESENTINGOUID = MODULEPRESENTINGOU.KPRESENTINGOUID
+INNER JOIN MODULE ON MODULEPRESENTINGOU.FMODULEAPID = MODULE.KACADEMICPROGRAMID
+INNER JOIN COURSELEVEL ON MODULE.FCOURSELEVELAPID = COURSELEVEL.KACADEMICPROGRAMID
+INNER JOIN COURSE ON COURSELEVEL.FCOURSEAPID = COURSE.KACADEMICPROGRAMID
+INNER JOIN MODPERIODENROLPRESCAT ON MODPERIODENROLPRESCAT.KENROLMENTPRESENTATIONID = STUDMOD.FMODPERIODENROLPRESCATID
+INNER JOIN CODEDESCRIPTION MODMVA ON MODMVA.KCODEDESCID = MODPRESCAT.FENROLMENTCATEGORYCODEID
+                AND MODMVA.KSYSTEMLANGUAGECODEID = 3
+INNER JOIN CODEDESCRIPTION MODPERIOD ON MODPERIODENROLPRESCAT.FMODULEPERIODCODEID = MODPERIOD.KCODEDESCID
+            AND MODPERIOD.KSYSTEMLANGUAGECODEID = 3
+INNER JOIN CODEDESCRIPTION MODULETYPE ON STUDMOD.FMODULETYPECODEID = MODULETYPE.KCODEDESCID
+            AND MODULETYPE.FCODEINDEX = 'VAKTIPE'
+            AND MODULETYPE.KSYSTEMLANGUAGECODEID = 3
+INNER JOIN STUDASSESOPP SAO ON SAO.KSTUDBUSENTID = STUDMOD.KSTUDBUSENTID
+            AND SAO.KENROLSTUDID = STUDMOD.KENROLSTUDID
+            AND SAO.OPPNO = (select max(SAOSUB.OPPNO) -- get max opportunity
+                                  from STUDASSESOPP SAOSUB
+                                 where SAOSUB.KSTUDBUSENTID = STUDMOD.KSTUDBUSENTID
+                                   and SAOSUB.KENROLSTUDID = STUDMOD.KENROLSTUDID)
+WHERE EXTRACT(year from STUDQUAL.STARTDATE) = '2023'
+        AND STUDQUAL.FSTUDACTIVECODEID = 30065
+        AND STUDQUAL.ISCONDITIONALREG = 0
+        AND QUALMOD.CODESHORTDESCRIPTION <> 'SHORT COURSE'
+        --AND PROGRAM.PROGRAMCODE = 'N301P'
+        AND PRESCAT.CODESHORTDESCRIPTION IN ('Distance','Contact')
+ORDER BY STUDQUAL.KSTUDBUSENTID
+
+
+
+
+        

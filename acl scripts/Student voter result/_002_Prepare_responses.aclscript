@@ -1,0 +1,88 @@
+COMMENT Set storage folder
+SET FOLDER /_002_Prepare
+SET SAFETY OFF
+
+COMMENT ********** PREPARE VOTING META DATA **************************************************************************************************
+
+COMMENT Add votersroll data to the voting meta data on local id
+COMMENT 002aa
+OPEN _001ad_Imp_meta
+OPEN _001aa_Votersroll SECONDARY
+JOIN PKEY Local_ID FIELDS Local_ID Response_ID IP_Address Timestamp Duplicate Time_Taken Seq_Number External_Reference Custom_Variable_1 Custom_Variable_2 Custom_Variable_3 Custom_Variable_4 Custom_Variable_5 Respondent_Email Country_Code Region Language SKEY STUDENT WITH NAME CAMPUS VOTE_REASON PRIMARY TO "_002aa_Meta_add_votersroll_data.FIL" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+COMMENT Add reponse status data to the voting meta data on response id
+COMMENT 002ab
+OPEN _002aa_Meta_add_votersroll_data
+OPEN _001af_Rawdata SECONDARY
+JOIN PKEY Response_ID FIELDS Local_ID Response_ID IP_Address Timestamp Duplicate Time_Taken Seq_Number External_Reference Custom_Variable_1 Custom_Variable_2 Custom_Variable_3 Custom_Variable_4 Custom_Variable_5 Respondent_Email Country_Code Region Language NAME CAMPUS VOTE_REASON SKEY Response_ID WITH Response_Status Device Operating_System Browser TO "_002ab_Meta_add_response_status" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+
+COMMENT Count the number of votes per response
+COMMENT 002ac
+OPEN _001ae_Imp_data
+SUMMARIZE ON Response_ID TO "_002ac_Votes_per_response.FIL" OPEN PRESORT ISOLOCALE root
+
+COMMENT Add the number of votes per response to the meta data on response id
+COMMENT 002ad
+OPEN _002ab_Meta_add_response_status
+OPEN _002ac_Votes_per_response SECONDARY
+JOIN PKEY Response_ID FIELDS Local_ID Response_ID IP_Address Timestamp Duplicate Time_Taken Seq_Number External_Reference Custom_Variable_1 Custom_Variable_2 Custom_Variable_3 Custom_Variable_4 Custom_Variable_5 Respondent_Email Country_Code Region Language NAME CAMPUS VOTE_REASON Response_Status Device Operating_System Browser SKEY Response_ID WITH COUNT PRIMARY TO "_002ad_Meta_add_vote_count" OPEN PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+DEFINE FIELD Vote_Count COMPUTED COUNT
+
+COMMENT Build a final voting meta file for further analysis
+COMMENT 002ax
+OPEN _002ad_Meta_add_vote_count
+EXTRACT FIELDS Local_ID Response_ID Response_Status Timestamp Time_Taken Vote_Count NAME As "Name" CAMPUS As "Campus" VOTE_REASON As "Vote_status" IP_Address Device Operating_System Browser TO "_002ax_Metadata_for_analysis" OPEN
+
+COMMENT ********** START OF TESTS **************************************************************************************************
+
+COMMENT Test 1 - Test to see if meta data can link to the votersroll
+COMMENT 002xa
+OPEN _002ax_Metadata_for_analysis
+EXTRACT RECORD IF Vote_status = "" TO "_002xa_Test01_no_link_to_votersroll"
+EXTRACT RECORD IF Vote_status <> "" TO "_002xb_Vacuum_metadata"
+
+COMMENT Test 2 - Test to see if meta data is on voters roll
+COMMENT 002xc
+OPEN _002xb_Vacuum_metadata
+EXTRACT RECORD IF Vote_status <> "ON VOTERS ROLL" TO "_002xc_Test02_not_on_voters_roll"
+EXTRACT RECORD IF Vote_status = "ON VOTERS ROLL" TO "_002xd_Vacuum_metadata"
+
+COMMENT Test 3 - Test to see if meta data is not completed
+COMMENT 002xe
+OPEN _002xd_Vacuum_metadata
+EXTRACT RECORD IF Response_status <> "Completed" TO "_002xe_Test03_vote_instance_not_completed"
+EXTRACT RECORD IF Response_status = "Completed" TO "_002xf_Vacuum_metadata"
+
+COMMENT Test 4 - Test for duplicate votes
+COMMENT Sort order determince whether to count the first or last voting instance
+COMMENT Sort ascending = keep first voting instance
+COMMENT Sort descending = keep last voting instance
+COMMENT 002xg
+OPEN _002xf_Vacuum_metadata
+DUPLICATES ON Local_ID OTHER Local_ID Response_ID Response_Status Timestamp Time_Taken Vote_Count Name Campus Vote_status IP_Address Device Operating_System Browser PRESORT TO "_002xg_Test04_duplicate vote.FIL" ISOLOCALE root
+SORT ON Local_ID Timestamp FIELDS Local_ID Response_ID Response_Status Timestamp Time_Taken Vote_Count Name Campus Vote_status IP_Address Device Operating_System Browser TO "_002xh_Sort_metadata" OPEN ISOLOCALE root
+COMMENT SORT ON Local_ID Timestamp D FIELDS Local_ID Response_ID Response_Status Timestamp Time_Taken Vote_Count Name Campus Vote_status IP_Address Device Operating_System Browser TO "_002xh_Sort_metadata" OPEN ISOLOCALE root
+SUMMARIZE ON Local_ID OTHER Local_ID Timestamp Response_ID Response_Status Time_Taken Vote_Count Name Campus Vote_status IP_Address Device Operating_System Browser TO "_002xi_Vacuum_metadata_no_duplicate.FIL" OPEN ISOLOCALE root
+
+COMMENT Test 5 - Test to see if meta data indicate voting instances for all categories
+COMMENT 002xj
+OPEN _002xi_Vacuum_metadata_no_duplicate
+EXTRACT RECORD IF Vote_count <> 15 TO "_002xj_Test05_vote_instance_incomplete"
+EXTRACT RECORD IF Vote_count = 15 TO "_002xk_Vacuum_metadata"
+
+COMMENT Build a final voting meta file for further analysis
+COMMENT Now the data contain only meta data for valid votes
+COMMENT 002ax
+OPEN _002xk_Vacuum_metadata
+EXTRACT RECORD TO "_002xx_Metadata_for_analysis" OPEN
+
+COMMENT Build a list of voting records matched to the valid meta data
+OPEN _001ae_Imp_data
+OPEN _002xx_Metadata_for_analysis SECONDARY
+JOIN PKEY Response_ID FIELDS Response_ID Timestamp Question_ID Answer_ID Answer_Text SKEY Response_ID WITH Local_ID Device Operating_System Browser TO "_002xx_Valid votes.FIL" PRESORT SECSORT ISOLOCALE root
+CLOSE SECONDARY
+CLOSE PRIMARY
+

@@ -1,0 +1,43 @@
+﻿Select
+    prr.RUN_RESULT_ID,
+    prrv.RESULT_VALUE,
+    piv.UOM,
+    piv.NAME,
+    piv.INPUT_VALUE_ID,
+    petf.ELEMENT_NAME,
+    pect.CLASSIFICATION_NAME,
+    ppa.ACTION_TYPE,
+    ppa.EFFECTIVE_DATE,
+    paa.ACTION_STATUS,
+    paaf.ASSIGNMENT_NUMBER,
+    papf.PERSON_ID,
+    papf.EMPLOYEE_NUMBER,
+    papf.FULL_NAME,
+    paaf.ORGANIZATION_ID
+From
+    HR.PAY_RUN_RESULTS prr,
+    HR.PAY_RUN_RESULT_VALUES prrv,
+    HR.PAY_INPUT_VALUES_F piv,
+    HR.PAY_ELEMENT_TYPES_F petf,
+    HR.PAY_ELEMENT_CLASSIFICATIONS_TL pect,
+    HR.PAY_PAYROLL_ACTIONS ppa,
+    HR.PAY_ASSIGNMENT_ACTIONS paa,
+    HR.PER_ALL_ASSIGNMENTS_F paaf,
+    HR.PER_ALL_PEOPLE_F papf
+Where
+    prr.RUN_RESULT_ID = prrv.RUN_RESULT_ID And
+    piv.INPUT_VALUE_ID = prrv.INPUT_VALUE_ID And
+    petf.ELEMENT_TYPE_ID = prr.ELEMENT_TYPE_ID And
+    pect.CLASSIFICATION_ID = petf.CLASSIFICATION_ID And
+    prr.ASSIGNMENT_ACTION_ID = paa.ASSIGNMENT_ACTION_ID And
+    paa.PAYROLL_ACTION_ID = ppa.PAYROLL_ACTION_ID And
+    paa.ASSIGNMENT_ID = paaf.ASSIGNMENT_ID And
+    ppa.PAYROLL_ACTION_ID = paa.PAYROLL_ACTION_ID And
+    papf.PERSON_ID = paaf.PERSON_ID And
+    piv.UOM = 'M' And
+    piv.NAME = 'Pay Value' And
+    pect.CLASSIFICATION_NAME In ('Normal Income', 'Allowances') And
+    paa.ACTION_STATUS = 'C' And
+    ppa.ACTION_TYPE In ('R') And
+    ppa.EFFECTIVE_DATE Between Trunc(paaf.EFFECTIVE_START_DATE) And Trunc(paaf.EFFECTIVE_END_DATE) And
+    Trunc(paaf.EFFECTIVE_END_DATE) Between papf.EFFECTIVE_START_DATE And papf.EFFECTIVE_END_DATE
