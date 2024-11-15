@@ -268,6 +268,6 @@ def lookup_import(s_table: str = 'all'):
 
 if __name__ == '__main__':
     try:
-        lookup_import('all')
+        lookup_import('hr')
     except Exception as e:
         funcsys.ErrMessage(e)

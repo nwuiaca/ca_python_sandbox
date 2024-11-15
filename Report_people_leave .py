@@ -52,6 +52,8 @@ SELECT
   X100_Per_absence_attendances.PERSON_ID,
   X100_Per_absence_attendances.ABSENCE_ATTENDANCE_ID,
   X100_Per_absence_attendances.BUSINESS_GROUP_ID,
+  X100_Per_absence_attendances.DATE_PROJECTED_END,
+  X100_Per_absence_attendances.DATE_PROJECTED_START,  
   X100_Per_absence_attendances.DATE_NOTIFICATION,
   X100_Per_absence_attendances.DATE_START,
   X100_Per_absence_attendances.DATE_END,
@@ -72,6 +74,8 @@ SELECT
   X100_Per_absence_attendances.ATTRIBUTE3,
   X100_Per_absence_attendances.ATTRIBUTE4,
   X100_Per_absence_attendances.ATTRIBUTE5,
+  X100_Per_absence_attendances.ATTRIBUTE6,
+  X100_Per_absence_attendances.ATTRIBUTE7,
   X100_Per_absence_attendances.LAST_UPDATE_DATE,
   X100_Per_absence_attendances.LAST_UPDATED_BY,
   X100_Per_absence_attendances.LAST_UPDATE_LOGIN,
@@ -142,8 +146,10 @@ print("Build previous absence attendances...")
 s_sql = s_sql_prev
 so_curs.execute("DROP TABLE IF EXISTS X103_PER_ABSENCE_ATTENDANCES_PREV")
 s_sql = s_sql.replace("X103_PER_ABSENCE_ATTENDANCES_CURR","X103_PER_ABSENCE_ATTENDANCES_PREV")
-s_sql = s_sql.replace("%CYEARB%",funcdatn.get_previous_year_begin())
-s_sql = s_sql.replace("%CYEARE%",funcdatn.get_previous_year_end())
+s_sql = s_sql.replace("%CYEARB%",'2022-01-01')
+s_sql = s_sql.replace("%CYEARE%",'2024-12-31')
+# s_sql = s_sql.replace("%CYEARB%",funcdatn.get_previous_year_begin())
+# s_sql = s_sql.replace("%CYEARE%",funcdatn.get_previous_year_end())
 so_curs.execute(s_sql)
 so_conn.commit()
 

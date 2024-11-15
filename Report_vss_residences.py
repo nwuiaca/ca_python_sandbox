@@ -72,9 +72,6 @@ so_curs.execute(s_sql)
 so_conn.commit()
 funcfile.writelog("%t BUILD TABLE: X000_Codedescription")
 
-
-
-
 print("RESIDENCE")
 print("---------")
 
@@ -88,6 +85,11 @@ SELECT
   RESIDENCENAME.NAME,
   X000_Codedescription.SHORT AS RESIDENCE_TYPE,
   RESIDENCE.FSITEORGUNITNUMBER AS CAMPUS,
+  Case
+    When RESIDENCE.FSITEORGUNITNUMBER = -2 Then 'Vanderbijlpark'
+    When RESIDENCE.FSITEORGUNITNUMBER = -9 Then 'Mahikeng'
+    Else 'Potchefstroom'
+  End As CAMPUS_NAME,
   RESIDENCE.STARTDATE,
   RESIDENCE.ENDDATE,
   RESIDENCE.RESIDENCECAPACITY
@@ -108,6 +110,8 @@ WHERE
 ORDER BY
   RESIDENCEID
 """
+# s_sql = s_sql.replace("%PYEARB%",'2019-01-01')
+# s_sql = s_sql.replace("%PYEARE%",'2019-12-31')
 s_sql = s_sql.replace("%PYEARB%",funcdatn.get_previous_year_begin())
 s_sql = s_sql.replace("%PYEARE%",funcdatn.get_previous_year_end())
 so_curs.execute("DROP TABLE IF EXISTS X001_Previous_residence")
@@ -143,6 +147,11 @@ SELECT
   RESIDENCENAME.NAME,
   X000_Codedescription.SHORT AS RESIDENCE_TYPE,
   RESIDENCE.FSITEORGUNITNUMBER AS CAMPUS,
+  Case
+    When RESIDENCE.FSITEORGUNITNUMBER = -2 Then 'Vanderbijlpark'
+    When RESIDENCE.FSITEORGUNITNUMBER = -9 Then 'Mahikeng'
+    Else 'Potchefstroom'
+  End As CAMPUS_NAME,
   RESIDENCE.STARTDATE,
   RESIDENCE.ENDDATE,
   RESIDENCE.RESIDENCECAPACITY
@@ -216,6 +225,8 @@ WHERE
   (TRANSINST.STARTDATE <= Date("%PYEARB%") AND
   TRANSINST.ENDDATE >= Date("%PYEARE%"))
 """
+# s_sql = s_sql.replace("%PYEARB%",'2019-01-01')
+# s_sql = s_sql.replace("%PYEARE%",'2019-12-31')
 s_sql = s_sql.replace("%PYEARB%",funcdatn.get_previous_year_begin())
 s_sql = s_sql.replace("%PYEARE%",funcdatn.get_previous_year_end())
 so_curs.execute("DROP TABLE IF EXISTS X002_Previous_rate")
@@ -301,6 +312,12 @@ s_sql = "CREATE TABLE X003_Previous_accom_log AS" + """
 SELECT
     ar.KACCOMMRESIDENCYID,
     ar.FSTUDENTBUSENTID AS STUDENT,
+    par.SURN_INIT As STUDENT_NAME,
+    par.DATEOFBIRTH,
+    par.GENDER,
+    par.NATIONALITY,
+    par.RACE,
+    act_res.CAMPUS_NAME,
     ar.FRESIDENCEID AS RESIDENCEID,
     act_res.NAME AS RESIDENCE_NAME,
     ar.FROOMTYPECODEID,
@@ -319,12 +336,16 @@ LEFT JOIN
     X000_Codedescription cd1 ON cd1.KCODEDESCID = ar.FACCOMMCANCELCODEID
 INNER JOIN
     X001_Previous_residence act_res ON act_res.RESIDENCEID = ar.FRESIDENCEID
+LEFT JOIN
+    VSS.X000_Party par On ar.FSTUDENTBUSENTID = par.KBUSINESSENTITYID
 WHERE
     ar.STARTDATE >= Date('%PYEARB%')
     AND ar.ENDDATE <= Date('%PYEARE%')
 ORDER BY
     STUDENT, ar.AUDITDATETIME
 ;"""
+# s_sql = s_sql.replace("%PYEARB%",'2019-01-01')
+# s_sql = s_sql.replace("%PYEARE%",'2019-12-31')
 s_sql = s_sql.replace("%PYEARB%",funcdatn.get_previous_year_begin())
 s_sql = s_sql.replace("%PYEARE%",funcdatn.get_previous_year_end())
 so_curs.execute("DROP TABLE IF EXISTS X003_Previous_accom_log")
@@ -357,6 +378,12 @@ s_sql = "CREATE TABLE X003_Current_accom_log AS" + """
 SELECT
     ar.KACCOMMRESIDENCYID,
     ar.FSTUDENTBUSENTID AS STUDENT,
+    par.SURN_INIT As STUDENT_NAME,
+    par.DATEOFBIRTH,
+    par.GENDER,
+    par.NATIONALITY,
+    par.RACE,
+    act_res.CAMPUS_NAME,
     ar.FRESIDENCEID AS RESIDENCEID,
     act_res.NAME AS RESIDENCE_NAME,
     ar.FROOMTYPECODEID,
@@ -375,6 +402,8 @@ LEFT JOIN
     X000_Codedescription cd1 ON cd1.KCODEDESCID = ar.FACCOMMCANCELCODEID
 INNER JOIN
     X001_Active_residence act_res ON act_res.RESIDENCEID = ar.FRESIDENCEID
+LEFT JOIN
+    VSS.X000_Party par On ar.FSTUDENTBUSENTID = par.KBUSINESSENTITYID
 WHERE
     ar.STARTDATE >= Date('%CYEARB%')
     AND ar.ENDDATE <= Date('%CYEARE%')

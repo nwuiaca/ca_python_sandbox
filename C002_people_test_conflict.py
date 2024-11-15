@@ -2618,6 +2618,7 @@ def people_test_conflict():
     Select
         i.nwu_number,
         p.name_address,
+        p.oe_code,
         i.company_name,
         i.company_registration_number,
         i.vendor_id,
@@ -2630,7 +2631,8 @@ def people_test_conflict():
         i.entity_name,
         i.regno_director,        
         i.entity_registration_number,
-        i.nwu_number || '-' || i.company_registration_number As exclude_combination          
+        i.nwu_number || '-' || i.company_registration_number As exclude_combination,
+        i.nwu_number || '-' || i.company_registration_number || '-' || p.oe_code As exclude_combination2
     From
         X200d_director_interest_match i Left Join
         PEOPLE.X000_PEOPLE p On p.employee_number = i.nwu_number Left Join
