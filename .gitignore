@@ -170,6 +170,7 @@ cython_debug/
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/csv-editor.xml
 
 # AWS User-specific
 .idea/**/aws.xml
@@ -241,10 +242,10 @@ fabric.properties
 
 # Albert
 *.csv
-*.ini
-*.xlsx
 *.fsqlayout
 *.history
+*.ini
+*.xlsx
 _my_modules/funcbott.py
 _my_modules/funcmail.py
 _my_modules/funcmysql.py
@@ -258,5 +259,6 @@ history/
 logs/
 logs_history/
 searchworks/
+sql queries sis/tables
 testing/
 yolandie/
