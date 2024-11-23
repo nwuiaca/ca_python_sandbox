@@ -109,6 +109,26 @@ ORDER BY
   X100_Per_absence_attendances.DATE_END
 """
 
+"""
+WHERE
+  (X100_Per_absence_attendances.DATE_START >= Date("%CYEARB%") AND
+  X100_Per_absence_attendances.DATE_END <= Date("%CYEARE%")) OR
+  (X100_Per_absence_attendances.DATE_START >= Date("%CYEARB%") AND
+  X100_Per_absence_attendances.DATE_START <= Date("%CYEARE%")) OR
+  (X100_Per_absence_attendances.DATE_END >= Date("%CYEARB%") AND
+  X100_Per_absence_attendances.DATE_END <= Date("%CYEARE%"))
+
+WHERE
+  (X100_Per_absence_attendances.DATE_START BETWEEN Date("%CYEARB%") AND Date("%CYEARE%"))
+  OR
+  (X100_Per_absence_attendances.DATE_END BETWEEN Date("%CYEARB%") AND Date("%CYEARE%"))
+  OR
+  (X100_Per_absence_attendances.DATE_START <= Date("%CYEARB%") 
+   AND X100_Per_absence_attendances.DATE_END >= Date("%CYEARE%"))
+
+"""
+
+
 # Save the sql for previous year too
 s_sql_prev = s_sql
 

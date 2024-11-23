@@ -2643,6 +2643,41 @@ def people_test_conflict():
     sqlite_connection.commit()
     funcfile.writelog(f"%t BUILD TABLE: {table_name}")
 
+    # Build a unique employee number company and vendor id table
+    if l_debug:
+        print("Build a unique employee number company and vendor id table...")
+    table_name: str = test_file_prefix + "e_master_table_unique"
+    s_sql = f"CREATE TABLE {table_name} As " + """
+    Select
+        m.nwu_number,
+        m.name_address,
+        m.oe_code,
+        m.company_name,
+        m.company_registration_number,
+        m.vendor_id,
+        m.vendor_name,
+        m.vendor_type,
+        m.vendor_match_type,
+        m.match_type,
+        Max(m.declaration_id) As declaration_id,
+        m.interest_id,
+        m.entity_name,
+        m.regno_director,
+        m.entity_registration_number,
+        m.exclude_combination,
+        m.exclude_combination2
+    From
+        X200e_master_table m
+    Group By
+        m.nwu_number,
+        m.company_registration_number,
+        m.vendor_id
+    ;"""
+    sqlite_cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
+    sqlite_cursor.execute(s_sql)
+    sqlite_connection.commit()
+    funcfile.writelog(f"%t BUILD TABLE: {table_name}")
+
     """*****************************************************************************
     TEST ACTIVE CIPC DIRECTOR ACTIVE VENDOR NO DECLARATION
     *****************************************************************************"""

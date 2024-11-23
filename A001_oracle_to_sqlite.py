@@ -350,6 +350,11 @@ def oracle_to_sqlite(s_table="000b_Table - temp.csv", s_tables="TEMP"):
                 c_test = ""
                 c_data = "("
                 i = 0
+
+                # if result[4] == 41775:
+                #     print("Result")
+                #     print(result)
+
                 for item in result:
 
                     if lty_lst[i] == "DATE":
@@ -388,9 +393,14 @@ def oracle_to_sqlite(s_table="000b_Table - temp.csv", s_tables="TEMP"):
                         c_data += "'" + c_test + "',"
                         
                     i += 1
+                    c_test = ""
                     
                 c_data += ")"
                 c_data = c_data.replace(",)", ")", 1)
+
+                # if result[4] == 41775:
+                #     print("Data")
+                #     print(c_data)
                 
                 if tb_alt != "":
                     c_text = 'INSERT INTO ' + tb_alt + ' VALUES' + c_data
@@ -404,6 +414,8 @@ def oracle_to_sqlite(s_table="000b_Table - temp.csv", s_tables="TEMP"):
                     de_cur.execute(c_text)
                 except:
                     funcfile.writelog(f"%t ERROR: {c_text}")
+
+                # break
 
             de_con.commit()
 

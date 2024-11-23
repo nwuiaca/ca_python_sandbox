@@ -1,0 +1,40 @@
+﻿Select
+    leav.ABSENCE_ATTENDANCE_ID,
+    leav.PERSON_ID,
+    leav.DATE_NOTIFICATION,
+    leav.DATE_PROJECTED_START,
+    leav.DATE_PROJECTED_END,
+    leav.DATE_START,
+    leav.DATE_END,
+    leav.ABSENCE_DAYS,
+    leav.LEAVE_TYPE_ID,
+    leav.LEAVE_TYPE,
+    leav.LEAVE_CATEGORY,
+    leav.LEAVE_CATEGORY_DESCRIPTION,
+    leav.LEAVE_REASON_ID,
+    leav.LEAVE_REASON,
+    leav.LEAVE_REASON_DESCRIPTION,
+    leav.APPROVER_PERSON_ID,
+    leav.AUTHORISING_PERSON_ID,
+    leav.PROGRAM_APPLICATION_ID,
+    leav.REFERENCE,
+    leav.DATE_FORM,
+    leav.DIY_REFERENCE,
+    leav.DIY_COMMENT,
+    leav.NEAR_PUBLIC_HOLIDAY,
+    leav.NEAR_WEEKEND,
+    leav.CREATED_BY,
+    leav.CREATION_DATE,
+    leav.UPDATED_BY,
+    leav.UPDATE_DATE,
+    leav.UPDATE_LOGIN,
+    leav.REASON_FOR_NOTIFICATION_DELAY,
+    leav.ACCEPT_LATE_NOTIFICATION_FLAG,
+    leav.OBJECT_VERSION_NUMBER
+From
+    X000_Leave_log leav
+Where
+    (leav.DATE_PROJECTED_START Between Date('2024-01-01') And Date('2024-12-31')) Or
+    (leav.DATE_PROJECTED_END Between Date('2024-01-01') And Date('2024-12-31')) Or
+    (leav.DATE_PROJECTED_START <= Date('2024-01-01') And
+        leav.DATE_PROJECTED_END >= Date('2024-12-31'))
