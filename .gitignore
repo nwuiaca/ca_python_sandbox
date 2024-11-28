@@ -171,6 +171,7 @@ cython_debug/
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/csv-editor.xml
+.idea/misc.xml
 
 # AWS User-specific
 .idea/**/aws.xml

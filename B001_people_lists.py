@@ -39,6 +39,7 @@ COUNT RECORDS
 BUILD ADDRESSES AND PHONES
 BUILD ASSIGNMENTS AND PEOPLE
 BUILD LIST OF CURRENT PEOPLE
+PEOPLE STRUCTURE LIST
 PEOPLE ORGANIZATION STRUCTURE REF (Employee numbers of structure)
 BUILD CURRENT SYSTEM USERS (X000_USER_CURR)
 BUILD SPOUSES (X000_SPOUSE)
@@ -1874,32 +1875,6 @@ def people_lists():
     so_conn.commit()
     funcfile.writelog("%t BUILD TABLE: X000_PEOPLE_CONTACT")
 
-    # Build a people structure list
-    print("Build a people structure list...")
-    s_sql = "CREATE TABLE X000_PEOPLE_STRUCT AS " + """
-    Select
-        peop1.employee_number,
-        peop1.name_address || ' (' || peop1.preferred_name || ')' As employee,
-        peop1.organization,
-        peop1.position_name,
-        peop1.grade_calc,
-        peop2.name_address || ' (' || peop2.preferred_name || ')' As line2,
-        peop3.name_address || ' (' || peop3.preferred_name || ')' As line3,
-        peop4.name_address || ' (' || peop4.preferred_name || ')' As line4,
-        ohead.name_address || ' (' || ohead.preferred_name || ')' As oehead,
-        1 as customer
-    From
-        X000_PEOPLE peop1 Inner Join
-        X000_PEOPLE peop2 On peop2.employee_number = peop1.supervisor_number Inner Join
-        X000_PEOPLE peop3 On peop3.employee_number = peop2.supervisor_number Inner Join
-        X000_PEOPLE peop4 On peop4.employee_number = peop3.supervisor_number Inner Join
-        X000_PEOPLE ohead On ohead.employee_number = peop1.oe_head_number
-    ;"""
-    so_curs.execute("DROP TABLE IF EXISTS X000_PEOPLE_STRUCT")
-    so_curs.execute(s_sql)
-    so_conn.commit()
-    funcfile.writelog("%t BUILD TABLE: X000_PEOPLE_STRUCT")
-
     if l_export:
         # EXPORT TABLE
         sr_file = "X000_PEOPLE"
@@ -1916,8 +1891,6 @@ def people_lists():
         # Write the data dated
         # funccsv.write_data(so_conn, "main", sr_file, sx_path, sx_file_dated, s_head)
         # funcfile.writelog("%t EXPORT DATA: " + sx_path + sx_file_dated)
-
-    # MESSAGE TO ADMIN
     if l_mess:
         # ACTIVE EMPLOYEES
         funcsms.send_telegram("", "administrator", "<b>" + str(i_count) + "</b> Active employees method 1")
@@ -1943,11 +1916,39 @@ def people_lists():
                                   "CURR",
                                   "Build current people...",
                                   "Y")
-
-    # MESSAGE TO ADMIN
     if l_mess:
         # ACTIVE EMPLOYEES
         funcsms.send_telegram("", "administrator", "<b>" + str(i_count) + "</b> Active employees method 3")
+
+    # Build PEOPLE STRUCTURE LIST *********************************************
+    print("Build a people structure list...")
+    table_name = "X000_PEOPLE_STRUCT"
+    s_sql = f"CREATE TABLE {table_name} AS " + """
+    Select
+        peop1.employee_number,
+        peop1.name_address || ' (' || peop1.preferred_name || ')' As employee,
+        peop1.organization,
+        peop1.position_name,
+        peop1.grade_calc,
+        peop2.name_address || ' (' || peop2.preferred_name || ')' As line2,
+        peop3.name_address || ' (' || peop3.preferred_name || ')' As line3,
+        peop4.name_address || ' (' || peop4.preferred_name || ')' As line4,
+        ohead.name_address || ' (' || ohead.preferred_name || ')' As oehead,
+        1 as customer
+    From
+        X000_PEOPLE peop1 Inner Join
+        X000_PEOPLE peop2 On peop2.employee_number = peop1.supervisor_number Inner Join
+        X000_PEOPLE peop3 On peop3.employee_number = peop2.supervisor_number Inner Join
+        X000_PEOPLE peop4 On peop4.employee_number = peop3.supervisor_number Inner Join
+        X000_PEOPLE ohead On ohead.employee_number = peop1.oe_head_number
+    ;"""
+    so_curs.execute(f"DROP TABLE IF EXISTS {table_name}")
+    so_curs.execute(s_sql)
+    so_conn.commit()
+    funcfile.writelog(f"%t BUILD TABLE: {table_name}")
+    i_count: int = funcsys.tablerowcount(so_curs, table_name)
+    if l_mess:
+        funcsms.send_telegram("", "administrator", "<b>" + str(i_count) + "</b> People structure records")
 
     # Build PEOPLE CURRENT ******************************************************
     funcpeople.people01(so_conn, "X002_PEOPLE_CURR_YEAR", "X001_ASSIGNMENT_CURR", "CURR",
@@ -2312,8 +2313,8 @@ def people_lists():
     funcfile.writelog("%t ATTACH DATABASE: PEOPLE.SQLITE")
 
     # TODO Delete after running on 20241119
-    so_curs.execute("DROP TABLE IF EXISTS X000_PEOPLE_STRUCT")
-    so_curs.execute("DROP TABLE IF EXISTS X103_PER_ABSENCE_ATTENDANCES")
+    # so_curs.execute("DROP TABLE IF EXISTS X000_PEOPLE_STRUCT")
+    # so_curs.execute("DROP TABLE IF EXISTS X103_PER_ABSENCE_ATTENDANCES")
     # so_curs.execute("DROP TABLE IF EXISTS X100_PER_ABSENCE_ATTENDANCES")
     # so_curs.execute("DROP TABLE IF EXISTS X101_PER_ABS_ATTENDANCE_REASONS")
     # so_curs.execute("DROP TABLE IF EXISTS X102_PER_ABSENCE_ATTENDANCE_TYPES")

@@ -23,13 +23,13 @@ ia_mysql_import = Function to import the mysql data
 """
 
 # SCRIPT WIDE VARIABLES
-s_function: str = "A007 BACKUP PEOPLE"
+s_function: str = "A009 BACKUP PEOPLE STRUCTURE"
 
 
-def ia_mysql_backup_people_structure(s_source_database: str = "Web_ia_nwu", s_target_database: str = "Web_nwu_ia"):
+def ia_mysql_backup_people_structure(s_target_database: str = "Web_nwu_ia"):
     """
     Script to import ia web data from mysql to sqlite
-    :param s_source_database: str: The MySQL database to import data from
+    :param s_target_database: str: The MySQL database to export data to
     :return: Nothing
     """
 
@@ -112,20 +112,23 @@ def ia_mysql_backup_people_structure(s_source_database: str = "Web_ia_nwu", s_ta
         # OBTAIN THE SQLITE TABLE COLUMN NAMES IN TEXT FORMAT
         s_source_struct = funcmysql.convert_struct_sqlite_mysql_text(so_curs, "X000_PEOPLE_STRUCT")
         if l_debug:
+            print("Source structure:")
             print(s_source_struct)
         s_source_column = funcmysql.get_colnames_sqlite_text(so_curs, "X000_PEOPLE_STRUCT", "")
         s_source_column = "(" + s_source_column.rstrip(", ") + ")"
         if l_debug:
+            print("Source column:")
             print(s_source_column)
         l_source_type = funcmysql.convert_coltypes_sqlite_mysql_list(so_curs, "X000_PEOPLE_STRUCT")
         if l_debug:
+            print("Source type:")
             print(l_source_type)
 
         # BUILD THE TARGET TABLE AFTER DELETING THE OLD TABLE
         if l_debug:
             print("Drop target table...")
-        ms_to_cursor.execute(f"DROP TABLE IF EXISTS `{target_table}`;")
-        ms_to_cursor.execute(f'CREATE TABLE `{target_table}` ( ' + s_source_struct + ' ) ENGINE = InnoDB;')
+        ms_to_cursor.execute(f"DROP TABLE IF EXISTS {target_table};")
+        ms_to_cursor.execute(f"CREATE TABLE {target_table} ({s_source_struct}) ENGINE = InnoDB;")
         i_table_counter = i_table_counter + 1
 
         # LOOP THE DATA SOURCE PER ROW

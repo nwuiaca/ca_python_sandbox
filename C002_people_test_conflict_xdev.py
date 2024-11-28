@@ -186,7 +186,7 @@ if funcdatn.get_current_month() in ("05", "06", "07", "08", "09", "10", "11"):
         From
             X200e_master_table_unique dir Inner Join
             KFSCURR.X001ad_Report_payments_accroute acc On acc.vendor_id = dir.vendor_id
-                and substr(acc.account_nm,2,4) != dir.oe_code 
+                and substr(acc.account_nm,2,4) = dir.oe_code 
         ;"""
         if l_debug:
             # print(s_sql)
